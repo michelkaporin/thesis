@@ -25,7 +25,7 @@ public class Tree {
 	/**
 	 * Inserts chunk into the leaf node, constructing k-ary tree in a bottom-up way
 	 */
-public void insert(Chunk chunk, long from, long to) {
+	public void insert(Chunk chunk, long from, long to) {
 		ChunkNode insertNode = new ChunkNode();
 		insertNode.chunk = chunk;
 		insertNode.from = from;
@@ -38,7 +38,8 @@ public void insert(Chunk chunk, long from, long to) {
 
 		if (lastLevelNode.children.size() < k) {
 			lastLevelNode.children.add(insertNode);
-			this.updateMetadata(lastLevelNode, insertNode);
+			insertNode.parent = lastLevelNode;
+			this.updateMetadata(insertNode);
 			return;
 		}
 
@@ -46,13 +47,15 @@ public void insert(Chunk chunk, long from, long to) {
 		while (lastLevelNode != null && lastLevelNode.children.size() >= k) {
 			MetaNode newLevelNode = new MetaNode();
 			newLevelNode.children.add(previousNode);
-			this.updateMetadata(newLevelNode, previousNode); // update metadata for newly created node
+			previousNode.parent = newLevelNode;
 			lastNodes.set(currentLevel, newLevelNode); // update last node on the current level
+			this.updateMetadata(previousNode); // update metadata for newly created node
 			previousNode = newLevelNode; // Update reference to the node that needs to be connected later on			
 
 			// Navigate to the upper level in the tree
+			currentLevel += 1;
 			try {
-				lastLevelNode = lastNodes.get(++currentLevel);
+				lastLevelNode = lastNodes.get(currentLevel);
 			} catch (IndexOutOfBoundsException e) {
 				lastLevelNode = null;
 			}
@@ -64,7 +67,11 @@ public void insert(Chunk chunk, long from, long to) {
 			root = new MetaNode();
 			root.children.add(lastRoot); // point last root to the new root
 			root.children.add(previousNode); // point last created node to the new root
-			this.updateMetadata(root, previousNode);
+			lastRoot.parent = root;
+			previousNode.parent = root;
+			lastNodes.add(root);
+			this.updateMetadata(lastRoot);
+			this.updateMetadata(previousNode);
 		}
 	}
 
@@ -81,8 +88,10 @@ public void insert(Chunk chunk, long from, long to) {
 
 		while (queue.size() != 0) {
 			Node current = queue.poll();
+			
+			System.out.format("Checking from %s to %s...\n", current.from, current.to);
 
-			// Range check
+			// Range check, don't continue if the node is out of range
 			if (current.from > to || from > current.to) {
 				continue;
 			}
@@ -129,15 +138,19 @@ public void insert(Chunk chunk, long from, long to) {
 	}
 
 	/**
-	 * Updates metadata about the stored nodes below in the tree
+	 * Rolls up the update to the metadata with respect to the newly stored leaf node
 	 */
-	private void updateMetadata(MetaNode existingNode, Node newNode) {
-		if (existingNode.from == 0L) {
-			existingNode.from = newNode.from;
+	private void updateMetadata(Node newNode) {
+		Node parent = newNode.parent;
+		while (parent != null) {
+			if (parent.from == 0L) {
+				parent.from = newNode.from;
+			}
+			parent.to = newNode.to;
+			((MetaNode) parent).count++;
+			
+			parent = parent.parent;
 		}
-		existingNode.to += newNode.to;
-
-		existingNode.count++;
 		// TODO: do something with min, max and sum
 	}
 }
