@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
-import treedb.server.tree.Tree;
-import treedb.server.tree.storage.FileSystem;
-import treedb.server.tree.storage.Storage;
+import treedb.server.index.Tree;
+import treedb.server.storage.FileSystem;
+import treedb.server.storage.Storage;
 
 public class API {
 	
@@ -21,18 +21,18 @@ public class API {
 		UUID id = UUID.randomUUID();
 		storage = new FileSystem();
 
-		treeMap.put(id, new Tree(k, storage));
+		treeMap.put(id, new Tree(k));
 		return id;
 	}
 
-	public static void insert(UUID streamID, String key, byte[] data, long fromTime, long toTime) {
+	public static void insert(UUID streamID, String key, byte[] data, Metadata metadata) {
 		Tree tree = treeMap.get(streamID);
 		if (tree == null) {
 			throw new NoSuchElementException("No stream exists for the following ID.");
 		}
 
 		if (storage.store(streamID.toString(), key, data)) {
-			tree.insert(key, fromTime, toTime);
+			tree.insert(key, metadata);
 		} else {
 			throw new RuntimeException("Insertion failed to happen.");
 		}

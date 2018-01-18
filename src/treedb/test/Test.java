@@ -3,6 +3,7 @@ package treedb.test;
 import java.util.List;
 import java.util.UUID;
 import treedb.server.API;
+import treedb.server.Metadata;
 
 public class Test {
 
@@ -10,12 +11,13 @@ public class Test {
 		// Insert chunk
 		UUID streamID = API.createStream(2);
 		for (int i = 1; i < 10; i += 2) {
-			long fromTime = i;
-			long toTime = i+1;
-			String keyAndData = String.format("%s-%s", fromTime, toTime);
-			
-			API.insert(streamID, keyAndData, keyAndData.getBytes(), fromTime, toTime);
-			System.out.format("Adding from %s to %s\n", fromTime, toTime);
+			long from = i;
+			long to = i+1;
+			String keyAndData = String.format("%s-%s", from, to);
+			Metadata md = new Metadata(from, to, 0, 0, 0, 0);
+
+			API.insert(streamID, keyAndData, keyAndData.getBytes(), md);
+			System.out.format("Adding from %s to %s\n", from, to);
 		}
 
 		int from = 2;
