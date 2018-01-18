@@ -7,17 +7,24 @@ import java.util.Queue;
 import treedb.server.tree.node.ChunkNode;
 import treedb.server.tree.node.MetaNode;
 import treedb.server.tree.node.Node;
+import treedb.server.tree.storage.Storage;
 
+/**
+ * TODO: Consider the cases when the tree is in the middle of insert operation and other data is inserted/read from it
+ */
 public class Tree {
 	private MetaNode root;
 	private int k; // maximum amount of children per node
+	private Storage storage;
 	
 	private List<MetaNode> lastNodes; // Stores last node under each tree level, level 0 reserved to the leaf nodes
 	
-	public Tree(int k) {
+	public Tree(int k, Storage s) {
 		root = new MetaNode();
 		
 		this.k = k;
+		this.storage = s;
+		
 		lastNodes = new ArrayList<MetaNode>();
 		lastNodes.add(root);
 	}
@@ -25,11 +32,11 @@ public class Tree {
 	/**
 	 * Inserts chunk into the leaf node, constructing k-ary tree in a bottom-up way
 	 */
-	public void insert(Chunk chunk, long from, long to) {
+	public void insert(String key, long from, long to) {
 		ChunkNode insertNode = new ChunkNode();
-		insertNode.chunk = chunk;
 		insertNode.from = from;
 		insertNode.to = to;
+		insertNode.storeKey = key;
 		
 		int currentLevel = 0;
 		
@@ -75,12 +82,12 @@ public class Tree {
 		}
 	}
 
-	public List<byte[]> getRange(long from, long to) throws IllegalArgumentException {
+	public List<String> getRange(long from, long to) throws IllegalArgumentException {
 		if (to < from) {
 			throw new IllegalArgumentException();
 		}
 
-		List<byte[]> matchingChunks = new ArrayList<byte[]>();
+		List<String> matchingChunks = new ArrayList<String>();
 
 		// Run BFS and collect matching chunks for this time range
 		Queue<Node> queue = new LinkedList<Node>();
@@ -96,7 +103,7 @@ public class Tree {
 				continue;
 			}
 			if (current instanceof ChunkNode) {
-				matchingChunks.add(((ChunkNode) current).chunk.data);
+				matchingChunks.add(((ChunkNode) current).storeKey);
 			}
 
 			for (Node node : current.children) {
@@ -123,20 +130,6 @@ public class Tree {
 		// TODO
 	}
 
-	private void getRange(Node current, long from, long to, List<Node> chunks) {
-		if (current.from < from) {
-			return;
-		}
-
-		for (Node n : current.children) {
-			getRange(n, from, to, chunks);
-		}
-		
-		if (current.from > from && current.to < to) {
-			chunks.add(current);
-		}
-	}
-
 	/**
 	 * Rolls up the update to the metadata with respect to the newly stored leaf node
 	 */
@@ -152,5 +145,6 @@ public class Tree {
 			parent = parent.parent;
 		}
 		// TODO: do something with min, max and sum
+		// TODO: modularise by allowing stats operations to be plugged in (plugins should operate the way the tree operates)
 	}
 }
