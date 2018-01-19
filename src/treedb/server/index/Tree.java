@@ -81,7 +81,7 @@ public class Tree {
 			throw new IllegalArgumentException();
 		}
 
-		List<String> matchingChunks = new ArrayList<String>();
+		List<String> matchingStorageKeys = new ArrayList<String>();
 
 		// Run BFS and collect matching chunks for this time range
 		Queue<Node> queue = new LinkedList<Node>();
@@ -89,15 +89,13 @@ public class Tree {
 
 		while (queue.size() != 0) {
 			Node current = queue.poll();
-			
-			System.out.format("Checking from %s to %s...\n", current.metadata.from, current.metadata.to);
 
 			// Range check, don't continue if the node is out of range
-			if (current.metadata.from > to || from > current.metadata.to) {
+			if (!inRange(current, from, to)) {
 				continue;
 			}
 			if (current instanceof ChunkNode) {
-				matchingChunks.add(((ChunkNode) current).storeKey);
+				matchingStorageKeys.add(((ChunkNode) current).storeKey);
 			}
 
 			for (Node node : current.children) {
@@ -105,23 +103,39 @@ public class Tree {
 			}
 		}
 
-		return matchingChunks;
+		return matchingStorageKeys;
 	}
 	
-	public void getCount(long from, long to) {
-		// TODO
-	}
+	public List<Metadata> getMetadata(long from, long to) {
+		if (to < from) {
+			throw new IllegalArgumentException();
+		}
 
-	public void getMin(long from, long to) {
-		// TODO
-	}
+		List<Metadata> gatheredStatistics = new ArrayList<Metadata>();
+		Queue<Node> queue = new LinkedList<Node>();
+		queue.add(root);
 
-	public void getMax(long from, long to) {
-		// TODO
-	}
+		while (queue.size() != 0) {
+			Node current = queue.poll();
 
-	public void getSum(long from, long to) {
-		// TODO
+			// Range check
+			if (!inRange(current, from, to)) {
+				continue;
+			}
+			
+			// If current node is fully contained within the search range, then store its stats
+			if ((current.metadata.to - current.metadata.from) <= (to - from)) {
+				gatheredStatistics.add(current.metadata);
+				continue;
+			}
+
+			// Else explore child nodes for the 
+			for (Node node : current.children) {
+				queue.add(node);
+			}
+		}
+
+		return gatheredStatistics;
 	}
 
 	/**
@@ -134,11 +148,22 @@ public class Tree {
 				parent.metadata.from = newNode.metadata.from;
 			}
 			parent.metadata.to = newNode.metadata.to;
-			parent.metadata.count++;
+			parent.metadata.count += newNode.metadata.count;
+			parent.metadata.max = Math.max(parent.metadata.max, newNode.metadata.max);
+			parent.metadata.min = Math.min(parent.metadata.min, newNode.metadata.min);
+			parent.metadata.sum += newNode.metadata.sum;
 			
 			parent = parent.parent;
 		}
 		// TODO: do something with min, max and sum
 		// TODO: modularise by allowing stats operations to be plugged in (plugins should operate the way the tree operates)
+	}
+
+	private boolean inRange(Node current, long from, long to) {
+		if (current.metadata.from <= to && from <= current.metadata.to) {
+			return true;
+		}
+
+		return false;
 	}
 }
