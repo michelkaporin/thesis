@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Queue;
 
 import treedb.server.Metadata;
+import treedb.server.MetadataConfiguration;
 import treedb.server.index.node.ChunkNode;
 import treedb.server.index.node.Node;
 
@@ -15,16 +16,22 @@ import treedb.server.index.node.Node;
 public class Tree {
 	private Node root;
 	private int k; // maximum amount of children per node
+	private MetadataConfiguration metaConfig;
 	
 	private List<Node> lastNodes; // Stores last node under each tree level, level 0 reserved to the leaf nodes
 	
-	public Tree(int k) {
+	public Tree(int k, MetadataConfiguration metaConfig) {
 		root = new Node();
 		
 		this.k = k;
+		this.metaConfig = metaConfig;
 		
 		lastNodes = new ArrayList<Node>();
 		lastNodes.add(root);
+	}
+
+	public MetadataConfiguration getMetadataConfig() {
+		return this.metaConfig;
 	}
 	
 	/**
@@ -124,7 +131,7 @@ public class Tree {
 			}
 			
 			// If current node is fully contained within the search range, then store its stats
-			if ((current.metadata.to - current.metadata.from) <= (to - from)) {
+			if (current.metadata.from >= from && current.metadata.to <= to) {
 				gatheredStatistics.add(current.metadata);
 				continue;
 			}
@@ -144,19 +151,9 @@ public class Tree {
 	private void updateMetadata(Node newNode) {
 		Node parent = newNode.parent;
 		while (parent != null) {
-			if (parent.metadata.from == 0L) {
-				parent.metadata.from = newNode.metadata.from;
-			}
-			parent.metadata.to = newNode.metadata.to;
-			parent.metadata.count += newNode.metadata.count;
-			parent.metadata.max = Math.max(parent.metadata.max, newNode.metadata.max);
-			parent.metadata.min = Math.min(parent.metadata.min, newNode.metadata.min);
-			parent.metadata.sum += newNode.metadata.sum;
-			
+			Metadata.updateMetadata(this.metaConfig, newNode.metadata, parent.metadata);
 			parent = parent.parent;
 		}
-		// TODO: do something with min, max and sum
-		// TODO: modularise by allowing stats operations to be plugged in (plugins should operate the way the tree operates)
 	}
 
 	private boolean inRange(Node current, long from, long to) {

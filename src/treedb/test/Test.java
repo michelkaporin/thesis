@@ -9,13 +9,15 @@ public class Test {
 
 	public static void main(String[] args) {
 		// Create and populate stream
-		UUID streamID = API.createStream(2);
+		String jsonContract = "{ 'count': true, 'sum': true, 'min': true, 'max': true }";
+		UUID streamID = API.createStream(2, jsonContract);
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
 			String keyAndData = String.format("%s-%s", from, to);
-			Metadata md = new Metadata(from, to, 1, 1, from, to);
 
+			String md = String.format("{ 'from': %s, 'to': %s, 'sum': 1, 'count': 1, 'min': %s, 'max': %s}", from, to, from, to);
+			System.out.println(md);
 			API.insert(streamID, keyAndData, keyAndData.getBytes(), md);
 			System.out.format("Adding from %s to %s\n", from, to);
 		}
@@ -25,7 +27,7 @@ public class Test {
 	}
 
 	private static void testGetStatistics(UUID streamID) {
-		long from = 1;
+		long from = 7;
 		long to = 12;
 		System.out.format("Querying for stats in %s..%s\n", from, to);
 		Metadata metadataResult = API.getStatistics(streamID, from, to);

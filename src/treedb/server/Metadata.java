@@ -28,7 +28,30 @@ public class Metadata {
         this.max = max;
     }
 
-    public static Metadata consolidate(List<Metadata> metadata) {
+    public boolean matchesConfig(MetadataConfiguration config) {
+        if ((config.count && count == 0) 
+            || (config.max && max == Long.MIN_VALUE)
+            || (config.min && min == Long.MAX_VALUE)
+            || (config.sum && sum == 0)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static void updateMetadata(MetadataConfiguration config, Metadata updateFrom, Metadata updateTo) {
+        if (updateTo.from == 0L) {
+            updateTo.from = updateFrom.from;
+        }
+        updateTo.to = updateFrom.to;
+
+        if (config.count) updateTo.count += updateFrom.count;
+        if (config.max) updateTo.max = Math.max(updateTo.max, updateFrom.max);
+        if (config.min) updateTo.min = Math.min(updateTo.min, updateFrom.min);
+        if (config.sum) updateTo.sum += updateFrom.sum;
+    }
+
+    public static Metadata consolidate(MetadataConfiguration config, List<Metadata> metadata) {
         long from = Long.MAX_VALUE, 
             to = Long.MIN_VALUE,
             sum = 0L, 
@@ -43,10 +66,11 @@ public class Metadata {
             if (md.to > to) {
                 to = md.to;
             }
-            sum += md.sum;
-            min = Math.min(md.min, min);
-            max = Math.max(md.max, max);
-            count += md.count;
+
+            if (config.sum) sum += md.sum;
+            if (config.min) min = Math.min(md.min, min); 
+            if (config.max) max = Math.max(md.max, max);
+            if (config.count) count += md.count;
         }
 
         return new Metadata(from, to, sum, count, min, max);
