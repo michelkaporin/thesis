@@ -1,21 +1,41 @@
 package treedb.test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import treedb.client.TreeDB;
 import treedb.server.Server;
 
 public class CommunicationTest {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         String ip = args[0];
-        int port = Integer.valueOf(args[1]);
+		int port = Integer.valueOf(args[1]);
+		
+		//testBasicFunctions(ip, port);
+		testMultipleClients(ip, port);
+	}
+	
+	private static void testBasicFunctions(String ip, int port) throws IOException {
         Server server = new Server(ip, port);
-        new Thread(server).start();
-        
-        TreeDB client = new TreeDB(ip, port);
-        client.openConnection();
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true }");
+		new Thread(server).start();
 
+		TreeDB client = new TreeDB(ip, port);
+		client.openConnection();
+		
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true }");
+		testInsert(client, streamID);
+        testGetRange(client, streamID);
+		testGetStatistics(client, streamID);
+
+		client.closeConnection();
+		server.terminate();
+	}
+
+	private static void testInsert(TreeDB client, String streamID) throws IOException {
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
@@ -26,11 +46,8 @@ public class CommunicationTest {
 			client.insert(streamID, keyAndData, keyAndData.getBytes(), md);
 			System.out.format("Adding from %s to %s\n", from, to);
         }
-
-        testGetRange(client, streamID);
-		testGetStatistics(client, streamID);
-    }
-    
+	}
+	
 	private static void testGetStatistics(TreeDB client, String streamID) throws IOException {
 		long from = 7;
 		long to = 12;
@@ -50,5 +67,34 @@ public class CommunicationTest {
 		}
 
 		return retrievedRange;
+	}
+
+	private static void testMultipleClients(String ip, int port) throws IOException, InterruptedException {
+        Server server = new Server(ip, port);
+		new Thread(server).start();
+
+		ExecutorService exec = Executors.newCachedThreadPool();
+		List<Callable<Void>> tasks = new ArrayList<Callable<Void>>();
+
+		for (int i=0; i < 10; i++) {
+			Callable<Void> c = new Callable<>() {
+				@Override
+				public Void call() throws Exception {
+					TreeDB client = new TreeDB(ip, port);
+					client.openConnection();
+		
+					//String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true }");
+					//testInsert(client, streamID);
+					//testGetRange(client, streamID);
+					testGetStatistics(client, "streamID");
+
+					return null;
+				}		
+			};
+			tasks.add(c);
+		}
+
+		exec.invokeAll(tasks);
+		server.terminate();
 	}
 }

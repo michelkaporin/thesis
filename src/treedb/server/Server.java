@@ -3,12 +3,12 @@ package treedb.server;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
@@ -30,60 +30,10 @@ public class Server implements Runnable {
         gson = new Gson();
         jsonParser = new JsonParser();
     }
-
-	private void initChannel(String ip, int port) throws IOException {
-        selector = Selector.open();
-        serverChannel = ServerSocketChannel.open();
-        serverChannel.configureBlocking(false);
-        serverChannel.bind(new InetSocketAddress(ip, port));
-		serverChannel.register(selector, serverChannel.validOps());
-    }
-
-    public Object callMethod(String json) {
-        LOGGER.info(json);
-        JsonObject jobject = jsonParser.parse(json).getAsJsonObject();
-        String operationName = jobject.get("operationID").getAsString();
-
-        switch (operationName) {
-            case "insert": {
-                String streamID = jobject.get("streamID").getAsString();
-                String key = jobject.get("key").getAsString();
-                String data = jobject.get("data").getAsJsonArray().toString();
-                String metadata = jobject.get("metadata").getAsString();
-
-                return API.insert(UUID.fromString(streamID), key, Utility.byteArrayStringToByteArray(data), metadata);
-            }
-            case "create": {
-                int k = jobject.get("k").getAsInt();
-                String contract = jobject.get("contract").getAsString();
-
-                return API.createStream(k, contract);
-            }
-            case "getrange": {
-                String streamID = jobject.get("streamID").getAsString();
-                long from = jobject.get("from").getAsLong();
-                long to = jobject.get("to").getAsLong();
-
-                return API.getRange(UUID.fromString(streamID), from, to);
-            }
-            case "getstatistics": {
-                String streamID = jobject.get("streamID").getAsString();
-                long from = jobject.get("from").getAsLong();
-                long to = jobject.get("to").getAsLong();
-
-                return API.getStatistics(UUID.fromString(streamID), from, to);
-            }
-            default: {
-                LOGGER.warning(String.format("Operation %s is not supported", operationName));
-            }
-        }
-
-        return null;
-    }
     
     public void run() {
         LOGGER.info("Server is running");
-        while (true) {
+        while (serverChannel.isOpen()) {
             try {
                 selector.select();
                 Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
@@ -121,9 +71,65 @@ public class Server implements Runnable {
 
                     selectedKeys.remove();
                 }
-			} catch (IOException e) {
-				LOGGER.severe(e.getMessage());
+			} catch (IOException | ClosedSelectorException e) {
+				LOGGER.severe(e.toString() + ": " + e.getMessage());
 			}
         }
+    }
+
+    public void terminate() throws IOException {
+        serverChannel.close();
+        serverChannel.keyFor(selector).cancel();
+        selector.close();
+    }
+
+	private void initChannel(String ip, int port) throws IOException {
+        selector = Selector.open();
+        serverChannel = ServerSocketChannel.open();
+        serverChannel.configureBlocking(false);
+        serverChannel.bind(new InetSocketAddress(ip, port));
+		serverChannel.register(selector, serverChannel.validOps());
+    }
+
+    private Object callMethod(String json) {
+        LOGGER.info(json);
+        JsonObject jobject = jsonParser.parse(json).getAsJsonObject();
+        String operationName = jobject.get("operationID").getAsString();
+
+        switch (operationName) {
+            case "insert": {
+                String streamID = jobject.get("streamID").getAsString();
+                String key = jobject.get("key").getAsString();
+                String data = jobject.get("data").getAsJsonArray().toString();
+                String metadata = jobject.get("metadata").getAsString();
+
+                return API.insert(Utility.UUIDFromString(streamID), key, Utility.byteArrayStringToByteArray(data), metadata);
+            }
+            case "create": {
+                int k = jobject.get("k").getAsInt();
+                String contract = jobject.get("contract").getAsString();
+
+                return API.createStream(k, contract);
+            }
+            case "getrange": {
+                String streamID = jobject.get("streamID").getAsString();
+                long from = jobject.get("from").getAsLong();
+                long to = jobject.get("to").getAsLong();
+
+                return API.getRange(Utility.UUIDFromString(streamID), from, to);
+            }
+            case "getstatistics": {
+                String streamID = jobject.get("streamID").getAsString();
+                long from = jobject.get("from").getAsLong();
+                long to = jobject.get("to").getAsLong();
+
+                return API.getStatistics(Utility.UUIDFromString(streamID), from, to);
+            }
+            default: {
+                LOGGER.warning(String.format("Operation %s is not supported", operationName));
+            }
+        }
+
+        return null;
     }
 }

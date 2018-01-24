@@ -1,5 +1,7 @@
 package treedb.server.utils;
 
+import java.util.UUID;
+
 public class Utility {
     public static byte[] byteArrayStringToByteArray(String byteArray) {
         String[] byteValues = byteArray.substring(1, byteArray.length() - 1).split(",");
@@ -9,5 +11,13 @@ public class Utility {
         }
 
         return bytes;
+    }
+
+    public static UUID UUIDFromString(String uuid) {
+        try {
+            return UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }
