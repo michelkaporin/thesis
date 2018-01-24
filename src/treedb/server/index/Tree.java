@@ -18,7 +18,7 @@ public class Tree {
 	private int k; // maximum amount of children per node
 	private MetadataConfiguration metaConfig;
 	
-	private List<Node> lastNodes; // Stores last node under each tree level, level 0 reserved to the leaf nodes
+	private List<Node> lastNodes; // Stores last node under each tree level
 	
 	public Tree(int k, MetadataConfiguration metaConfig) {
 		root = new Node();

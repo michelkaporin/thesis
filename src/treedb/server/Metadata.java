@@ -79,4 +79,17 @@ public class Metadata {
     public String toString() {
         return String.format("From\tTo\tSum\tMin\tMax\tCount\n%s\t%s\t%s\t%s\t%s\t%s", from, to, sum, min, max, count);
     }
+
+    public String toJson(MetadataConfiguration config) {
+        StringBuilder str = new StringBuilder();
+        str.append("{");
+        str.append(String.format("\"from\": %s, \"to\": %s", from, to));
+        if (config.sum) str.append(", \"sum\": " + sum);
+        if (config.min) str.append(", \"min\": " + min);
+        if (config.max) str.append(", \"max\": " + max);
+        if (config.count) str.append(", \"count\": " + count);
+        str.append("}");
+
+        return str.toString();
+    }
 }

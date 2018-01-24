@@ -11,8 +11,19 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "treedb.test.Test",
+            "mainClass": "treedb.test.APITest",
             "args": ""
+        },
+        {
+            "projectName": "treedb",
+            "type": "java",
+            "name": "Communication Test",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "treedb.test.CommunicationTest",
+            "args": "127.0.0.1 8001"
         }
     ]
 }
