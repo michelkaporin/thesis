@@ -5,8 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import treedb.server.Metadata;
-import treedb.server.MetadataConfiguration;
+import treedb.server.index.Metadata;
+import treedb.server.index.MetadataConfiguration;
 import treedb.server.index.node.ChunkNode;
 import treedb.server.index.node.Node;
 

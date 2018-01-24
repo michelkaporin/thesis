@@ -2,7 +2,7 @@ package treedb.server.index.node;
 
 import java.util.ArrayList;
 import java.util.List;
-import treedb.server.Metadata;
+import treedb.server.index.Metadata;
 
 public class Node {
 	public Node parent;

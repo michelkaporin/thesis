@@ -1,4 +1,4 @@
-package treedb.server;
+package treedb.server.index;
 
 import java.util.List;
 

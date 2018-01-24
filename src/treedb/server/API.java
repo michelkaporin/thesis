@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+import treedb.server.index.Metadata;
+import treedb.server.index.MetadataConfiguration;
 import treedb.server.index.Tree;
 import treedb.server.storage.FileSystem;
 import treedb.server.storage.Storage;

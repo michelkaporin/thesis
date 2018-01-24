@@ -1,6 +1,6 @@
 package treedb.server.index.node;
 
-import treedb.server.Metadata;
+import treedb.server.index.Metadata;
 
 public class ChunkNode extends Node {
     public String storeKey;

@@ -1,4 +1,4 @@
-package treedb.server;
+package treedb.server.index;
 
 public class MetadataConfiguration {
     public boolean count;
