@@ -3,7 +3,6 @@ package treedb.test;
 import java.util.List;
 import java.util.UUID;
 import treedb.server.API;
-import treedb.server.index.Metadata;
 
 public class APITest {
 

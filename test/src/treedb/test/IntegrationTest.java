@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import treedb.client.TreeDB;
 import treedb.server.Server;
 
-public class CommunicationTest {
+public class IntegrationTest {
     public static void main(String[] args) throws IOException, InterruptedException {
         String ip = args[0];
 		int port = Integer.valueOf(args[1]);
