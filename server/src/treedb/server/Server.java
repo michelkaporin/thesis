@@ -49,7 +49,7 @@ public class Server implements Runnable {
                     } else if (key.isReadable()) {
                         // deserialise the message and call the API
                         SocketChannel client = (SocketChannel) key.channel();
-                        ByteBuffer buffer = ByteBuffer.allocate(256);
+                        ByteBuffer buffer = ByteBuffer.allocate(51200); // 50 MB buffer max
                         int numRead = client.read(buffer);
                         if (numRead  == -1) {
                             client.close();
@@ -108,8 +108,9 @@ public class Server implements Runnable {
             case "create": {
                 int k = jobject.get("k").getAsInt();
                 String contract = jobject.get("contract").getAsString();
+                String pubKeyModulus = jobject.get("modulus").getAsString();
 
-                return API.createStream(k, contract);
+                return API.createStream(k, contract, Utility.unmarshalPublicKey(pubKeyModulus));
             }
             case "getrange": {
                 String streamID = jobject.get("streamID").getAsString();

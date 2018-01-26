@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.n1analytics.paillier.PaillierPublicKey;
 import treedb.client.json.CreateStreamRequest;
 import treedb.client.json.GetRangeRequest;
 import treedb.client.json.GetStatisticsRequest;
@@ -57,15 +58,14 @@ public class TreeDB {
 		}
     }
 
-    public String createStream(int k, String contract) throws IOException {
-        String json = gson.toJson(new CreateStreamRequest(k, contract));
+    public String createStream(int k, String contract, PaillierPublicKey pubKey) throws IOException {
+        String json = gson.toJson(new CreateStreamRequest(k, contract, Utility.marshalPaillierPublicKey(pubKey)));
         LOGGER.info(json);
         String result = getResult(json);
         return gson.fromJson(result, String.class);
     }
     
     public boolean insert(String streamID, String key, byte[] data, String metadata) throws IOException {
-        // Serialise parameters 
         String json = gson.toJson(new InsertRequest(streamID, key, data, metadata));
         LOGGER.info(json);
 
@@ -112,7 +112,7 @@ public class TreeDB {
             throw e;
         }
 
-        buffer = ByteBuffer.allocate(256);
+        buffer = ByteBuffer.allocate(5120);  // 5 MB buffer max
         int numRead = 0;
         try {
             numRead = channel.read(buffer);

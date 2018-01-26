@@ -4,28 +4,19 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "verify server",
+            "label": "Build server",
             "type": "shell",
-            "command": "cd server && mvn -B verify",
-            "group": "build"
+            "command": "cd server && mvn clean install"
         },
         {
-            "label": "verify client",
+            "label": "Build client",
             "type": "shell",
-            "command": "cd server && mvn -B verify",
-            "group": "build"
+            "command": "cd client && mvn clean install"
         },
         {
-            "label": "verify test",
+            "label": "Download sources for test project",
             "type": "shell",
-            "command": "cd server && mvn -B verify",
-            "group": "build"
-        },
-        {
-            "label": "test",
-            "type": "shell",
-            "command": "mvn -B test",
-            "group": "test"
+            "command": "cd test && mvn eclipse:eclipse -DdownloadSources"
         }
     ]
 }

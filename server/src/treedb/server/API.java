@@ -1,7 +1,12 @@
 package treedb.server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.n1analytics.paillier.PaillierPublicKey;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +24,9 @@ public class API {
 	private static Map<UUID, Tree> indexMap = new HashMap<UUID, Tree>();
 	private static Storage storage;
 	private static Gson gson = new Gson();
+    private static JsonParser jsonParser = new JsonParser();
 
-	public static Object createStream(int k, String json) {
+	public static Object createStream(int k, String json, PaillierPublicKey pubKey) {
 		UUID id = UUID.randomUUID();
 		storage = new FileSystem();
 
@@ -30,6 +36,7 @@ public class API {
 		} catch (JsonSyntaxException e) {
 			return new FailureJson("JSON provided for metadata is incorrect.");
 		}
+		mc.setPaillierPublicKey(pubKey);
 
 		indexMap.put(id, new Tree(k, mc));
 		return id.toString();
@@ -43,7 +50,20 @@ public class API {
 		
 		Metadata md = null;
 		try {
-			md = gson.fromJson(metadata, Metadata.class);
+			JsonObject jobject = jsonParser.parse(metadata).getAsJsonObject();
+			long from = jobject.get("from").getAsLong();
+			long to = jobject.get("to").getAsLong();
+
+			BigInteger sum = null, count = null, min = null, max = null;
+			JsonElement jSum = jobject.get("sum");
+			JsonElement jCount = jobject.get("count");
+			JsonElement jMin = jobject.get("min");
+			JsonElement jMax = jobject.get("max");
+			if (jSum != null) sum = jSum.getAsBigInteger();
+			if (jCount != null) count = jSum.getAsBigInteger();
+			if (jMin != null) min = jSum.getAsBigInteger();
+			if (jMax != null) max = jSum.getAsBigInteger();
+			md = new Metadata(index.getMetadataConfig(), from, to, sum, count, min, max);
 		} catch (JsonSyntaxException e) {
 			return new FailureJson("JSON provided for metadata is incorrect.");
 		}

@@ -13,6 +13,8 @@
         <version>3.7.0</version>
         <configuration>
           <release>9</release>
+          <downloadSources>true</downloadSources>
+          <downloadJavadocs>true</downloadJavadocs>
         </configuration>
       </plugin>
     </plugins>

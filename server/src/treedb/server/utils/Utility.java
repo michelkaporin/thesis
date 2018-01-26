@@ -1,6 +1,8 @@
 package treedb.server.utils;
 
+import java.math.BigInteger;
 import java.util.UUID;
+import com.n1analytics.paillier.PaillierPublicKey;
 
 public class Utility {
     public static byte[] byteArrayStringToByteArray(String byteArray) {
@@ -19,5 +21,9 @@ public class Utility {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    public static PaillierPublicKey unmarshalPublicKey(String modulus) {
+        return new PaillierPublicKey(new BigInteger(modulus));
     }
 }
