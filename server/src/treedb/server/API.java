@@ -8,6 +8,7 @@ import com.google.gson.JsonSyntaxException;
 import com.n1analytics.paillier.PaillierPublicKey;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import treedb.server.index.Tree;
 import treedb.server.storage.FileSystem;
 import treedb.server.storage.Storage;
 import treedb.server.utils.FailureJson;
+import treedb.server.utils.Utility;
 
 public class API {
 	
@@ -55,15 +57,18 @@ public class API {
 			long to = jobject.get("to").getAsLong();
 
 			BigInteger sum = null, count = null, min = null, max = null;
+			BitSet tags = null;
 			JsonElement jSum = jobject.get("sum");
 			JsonElement jCount = jobject.get("count");
 			JsonElement jMin = jobject.get("min");
 			JsonElement jMax = jobject.get("max");
+			JsonElement jTags = jobject.get("tags");
 			if (jSum != null) sum = jSum.getAsBigInteger();
 			if (jCount != null) count = jSum.getAsBigInteger();
-			if (jMin != null) min = jSum.getAsBigInteger();
-			if (jMax != null) max = jSum.getAsBigInteger();
-			md = new Metadata(index.getMetadataConfig(), from, to, sum, count, min, max);
+			if (jMin != null) min = jMin.getAsBigInteger();
+			if (jMax != null) max = jMax.getAsBigInteger();
+			if (jTags != null) tags = Utility.unmarshalBitSet(jTags.getAsJsonArray());
+			md = new Metadata(index.getMetadataConfig(), from, to, sum, count, min, max, tags);
 		} catch (JsonSyntaxException e) {
 			return new FailureJson("JSON provided for metadata is incorrect.");
 		}

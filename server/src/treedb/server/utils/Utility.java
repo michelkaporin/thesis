@@ -1,7 +1,12 @@
 package treedb.server.utils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Iterator;
 import java.util.UUID;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.n1analytics.paillier.PaillierPublicKey;
 
 public class Utility {
@@ -25,5 +30,28 @@ public class Utility {
 
     public static PaillierPublicKey unmarshalPublicKey(String modulus) {
         return new PaillierPublicKey(new BigInteger(modulus));
+    }
+
+    public static BitSet unmarshalBitSet(JsonArray bitset) {
+        ArrayList<Long> setBits = new ArrayList<>();
+        Iterator<JsonElement> it = bitset.iterator();
+        while (it.hasNext()) {
+            setBits.add(it.next().getAsLong());
+        }
+        setBits.toArray();
+        long[] bits = new long[setBits.size()];
+
+        for (int i = 0; i < setBits.size(); i++) {
+            bits[i] = setBits.get(i).longValue();
+        }
+        return BitSet.valueOf(bits);
+    }
+
+    public static void mergeBitSet(BitSet fromBitSet, BitSet toBitSet) {
+        int nextBit = fromBitSet.nextSetBit(0);
+        while (nextBit != -1) {
+            toBitSet.set(nextBit);
+            nextBit = fromBitSet.nextSetBit(nextBit+1);
+        }
     }
 }

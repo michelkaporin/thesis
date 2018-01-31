@@ -1,4 +1,4 @@
-package treedb.client.utils;
+package treedb.client.security;
 
 import com.n1analytics.paillier.PaillierPrivateKey;
 import com.n1analytics.paillier.PaillierPublicKey;

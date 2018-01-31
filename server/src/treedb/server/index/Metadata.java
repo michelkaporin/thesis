@@ -1,7 +1,12 @@
 package treedb.server.index;
 
 import com.n1analytics.paillier.EncryptedNumber;
+
+import treedb.server.utils.Utility;
+
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 public class Metadata {
@@ -14,15 +19,17 @@ public class Metadata {
 	public EncryptedNumber count;
 	public EncryptedNumber min;
     public EncryptedNumber max;
+    public BitSet tags;
     
     public Metadata() {
         this.min = null;
         this.max = null;
         this.sum = null;
         this.count = null;
+        this.tags = null;
     }
 
-    public Metadata(MetadataConfiguration config, long from, long to, BigInteger sum, BigInteger count, BigInteger min, BigInteger max) {
+    public Metadata(MetadataConfiguration config, long from, long to, BigInteger sum, BigInteger count, BigInteger min, BigInteger max, BitSet tags) {
         this.from = from;
         this.to = to;
         
@@ -38,9 +45,12 @@ public class Metadata {
         if (max != null) {
             this.max = new EncryptedNumber(config.getPaillierContext(), max, EXPONENT);
         }
+        if (tags != null) {
+            this.tags = tags;
+        }
     }
 
-    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, EncryptedNumber min, EncryptedNumber max) {
+    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, EncryptedNumber min, EncryptedNumber max, BitSet tags) {
         this.from = from;
         this.to = to;
         
@@ -48,13 +58,15 @@ public class Metadata {
         this.count = count;
         this.min = min;
         this.max = max;
+        this.tags = tags;
     }
 
     public boolean matchesConfig(MetadataConfiguration config) {
         if ((config.count && count == null) 
             || (config.max && max == null)
             || (config.min && min == null)
-            || (config.sum && sum == null)) {
+            || (config.sum && sum == null)
+            || (config.tags && tags == null)) {
             return false;
         }
 
@@ -73,12 +85,21 @@ public class Metadata {
         if (config.sum) {
             updateTo.sum = updateTo.sum == null ? updateFrom.sum : updateTo.sum.add(updateFrom.sum);
         }
+        if (config.tags) {
+            if (updateTo.tags == null) {
+                updateTo.tags = updateFrom.tags;
+            } else {
+                // Merge bitsets
+                Utility.mergeBitSet(updateFrom.tags, updateTo.tags);
+            }
+        }
         // TODO: Min/Max
     }
 
     public static Metadata consolidate(MetadataConfiguration config, List<Metadata> metadata) {
         long from = Long.MAX_VALUE, to = Long.MIN_VALUE;
         EncryptedNumber sum = null, count = null, min = null, max = null;
+        BitSet bs = new BitSet();
 
         for (Metadata md : metadata) {
             if (md.from < from) {
@@ -94,10 +115,13 @@ public class Metadata {
             if (config.count) {
                 count = count == null ? md.count : count.add(md.count);
             }
+            if (config.tags) {
+                Utility.mergeBitSet(md.tags, bs);
+            }
             // TODO: Min/Max
         }
 
-        return new Metadata(from, to, sum, count, min, max);
+        return new Metadata(from, to, sum, count, min, max, bs);
     }
 
     public String toJson(MetadataConfiguration config) {
@@ -108,6 +132,7 @@ public class Metadata {
         if (config.min && min != null) str.append(", \"min\": " + min.calculateCiphertext()); // != null safety check while min/max implementation in progress
         if (config.max && min != null) str.append(", \"max\": " + max.calculateCiphertext());
         if (config.count) str.append(", \"count\": " + count.calculateCiphertext());
+        if (config.tags) str.append(", \"tags\": " + Arrays.toString(tags.toLongArray()));
         str.append("}");
 
         return str.toString();

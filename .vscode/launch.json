@@ -7,6 +7,17 @@
         {
             "projectName": "treedb.server",
             "type": "java",
+            "name": "Start Server",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "treedb.server.Main",
+            "args": "127.0.0.1 8001"
+        },
+        {
+            "projectName": "treedb.server",
+            "type": "java",
             "name": "API Test",
             "request": "launch",
             "cwd": "${workspaceFolder}",
