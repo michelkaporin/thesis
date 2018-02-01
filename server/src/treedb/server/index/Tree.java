@@ -144,6 +144,18 @@ public class Tree {
 
 		return gatheredStatistics;
 	}
+	
+	/**
+	 * Checks that data to be inserted is newer then the last inserted chunk.
+	 * Ensures that index is append-only.
+	 */
+	public boolean dataIsNewer(Metadata md) {
+		if (md.from > lastNodes.get(0).metadata.from) {
+			return true;
+		}
+
+		return false;
+	}
 
 	/**
 	 * Rolls up the update to the metadata with respect to the newly stored leaf node

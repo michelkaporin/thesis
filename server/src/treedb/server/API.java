@@ -78,6 +78,10 @@ public class API {
 			return new FailureJson("Metadata provided does not match metadata configuration for this stream.");
 		}
 
+		if (!index.dataIsNewer(md)) {
+			return new FailureJson("The index is append-only. Insertion of data in the middle is not allowed.");
+		}
+
 		if (storage.store(streamID.toString(), key, data)) {
 			index.insert(key, md);
 		} else {
