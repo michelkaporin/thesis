@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import ch.ethz.inf.dsg.crypto.OPE;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -54,18 +55,20 @@ public class IntegrationTest {
 		TreeDB client = new TreeDB(ip, port);
 		client.openConnection();
 		
+		byte[] key = new byte[16];
 		CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 		Trapdoor td = new Trapdoor();
+		OPE ope = new OPE(key, 64, 128);
         String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey);
-		testInsert(client, streamID, keys.publicKey, td);
+		testInsert(client, streamID, keys.publicKey, td, ope);
         testGetRange(client, streamID);
-		testGetStatistics(client, streamID, keys.privateKey, td);
+		testGetStatistics(client, streamID, keys.privateKey, td, ope);
 
 		client.closeConnection();
 		// server.terminate();
 	}
 
-	private static void testInsert(TreeDB client, String streamID, PaillierPublicKey pubKey, Trapdoor td) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+	private static void testInsert(TreeDB client, String streamID, PaillierPublicKey pubKey, Trapdoor td, OPE ope) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
@@ -73,15 +76,17 @@ public class IntegrationTest {
 			BigInteger count = pubKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
 			String keyAndData = String.format("%s-%s", from, to); // data should be encrypted in a non-paillier way
 			String tags = td.getFilter("test" + keyAndData, 0.01, 16);
+			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
+			BigInteger max = ope.encrypt(BigInteger.valueOf(to));
 
-			String md = String.format("{ 'from': %s, 'to': %s, 'sum': %s, 'count': %s, 'min': %s, 'max': %s, 'tags': %s }", from, to, sum, count, from, to, tags);
+			String md = String.format("{ 'from': %s, 'to': %s, 'sum': %s, 'count': %s, 'min': %s, 'max': %s, 'tags': %s }", from, to, sum, count, min, max, tags);
 			System.out.println(md);
 			client.insert(streamID, keyAndData, keyAndData.getBytes(), md);
 			System.out.format("Adding from %s to %s\n", from, to);
         }
 	}
 	
-	private static void testGetStatistics(TreeDB client, String streamID, PaillierPrivateKey privKey, Trapdoor td) throws Exception {
+	private static void testGetStatistics(TreeDB client, String streamID, PaillierPrivateKey privKey, Trapdoor td, OPE ope) throws Exception {
 		long from = 7;
 		long to = 12;
 		System.out.format("Querying for stats in %s..%s\n", from, to);
@@ -93,7 +98,10 @@ public class IntegrationTest {
 		JsonObject jObj = parser.parse(metadataResult).getAsJsonObject();
 		BigInteger sum = jObj.get("sum").getAsBigInteger();
 		BigInteger count = jObj.get("count").getAsBigInteger();
+		BigInteger min = jObj.get("min").getAsBigInteger();
+		BigInteger max = jObj.get("max").getAsBigInteger();
 		System.out.format("sum: %s; count: %s\n", privKey.raw_decrypt(sum), privKey.raw_decrypt(count));
+		System.out.format("min: %s; max: %s\n", ope.decrypt(min), ope.decrypt(max));
 
 		JsonArray tags = jObj.get("tags").getAsJsonArray();
 		BitSet bs = Utility.unmarshalBitSet(tags);
@@ -132,10 +140,11 @@ public class IntegrationTest {
 		
 					CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 					Trapdoor td = new Trapdoor();
+					OPE ope = new OPE(new byte[16], 64, 128);
 					//String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true }");
 					//testInsert(client, streamID);
 					//testGetRange(client, streamID);
-					testGetStatistics(client, "streamID", keys.privateKey, td);
+					testGetStatistics(client, "streamID", keys.privateKey, td, ope);
 
 					return null;
 				}		

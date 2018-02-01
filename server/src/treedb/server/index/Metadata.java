@@ -17,8 +17,8 @@ public class Metadata {
 
 	public EncryptedNumber sum;
 	public EncryptedNumber count;
-	public EncryptedNumber min;
-    public EncryptedNumber max;
+	public BigInteger min;
+    public BigInteger max;
     public BitSet tags;
     
     public Metadata() {
@@ -40,17 +40,17 @@ public class Metadata {
             this.count = new EncryptedNumber(config.getPaillierContext(), count, EXPONENT);
         }
         if (min != null) {
-            this.min = new EncryptedNumber(config.getPaillierContext(), min, EXPONENT);
+            this.min = min;
         }
         if (max != null) {
-            this.max = new EncryptedNumber(config.getPaillierContext(), max, EXPONENT);
+            this.max = max;
         }
         if (tags != null) {
             this.tags = tags;
         }
     }
 
-    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, EncryptedNumber min, EncryptedNumber max, BitSet tags) {
+    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, BigInteger min, BigInteger max, BitSet tags) {
         this.from = from;
         this.to = to;
         
@@ -89,16 +89,21 @@ public class Metadata {
             if (updateTo.tags == null) {
                 updateTo.tags = updateFrom.tags;
             } else {
-                // Merge bitsets
-                Utility.mergeBitSet(updateFrom.tags, updateTo.tags);
+                Utility.mergeBitSet(updateFrom.tags, updateTo.tags); // merge bitsets
             }
         }
-        // TODO: Min/Max
+        if (config.min) {
+            updateTo.min = updateTo.min == null ? updateFrom.min : updateTo.min.min(updateFrom.min);
+        }
+        if (config.max) {
+            updateTo.max = updateTo.max == null ? updateFrom.max : updateTo.max.max(updateFrom.max);
+        }
     }
 
     public static Metadata consolidate(MetadataConfiguration config, List<Metadata> metadata) {
         long from = Long.MAX_VALUE, to = Long.MIN_VALUE;
-        EncryptedNumber sum = null, count = null, min = null, max = null;
+        EncryptedNumber sum = null, count = null;
+        BigInteger min = null, max = null;
         BitSet bs = new BitSet();
 
         for (Metadata md : metadata) {
@@ -118,7 +123,12 @@ public class Metadata {
             if (config.tags) {
                 Utility.mergeBitSet(md.tags, bs);
             }
-            // TODO: Min/Max
+            if (config.min) {
+                min = min == null ? md.min : md.min.min(min);
+            }
+            if (config.min) {
+                max = max == null ? md.max : md.max.max(max);
+            }
         }
 
         return new Metadata(from, to, sum, count, min, max, bs);
@@ -129,8 +139,8 @@ public class Metadata {
         str.append("{");
         str.append(String.format("\"from\": %s, \"to\": %s", from, to));
         if (config.sum) str.append(", \"sum\": " + sum.calculateCiphertext());
-        if (config.min && min != null) str.append(", \"min\": " + min.calculateCiphertext()); // != null safety check while min/max implementation in progress
-        if (config.max && min != null) str.append(", \"max\": " + max.calculateCiphertext());
+        if (config.min && min != null) str.append(", \"min\": " + min); // != null safety check while min/max implementation in progress
+        if (config.max && min != null) str.append(", \"max\": " + max);
         if (config.count) str.append(", \"count\": " + count.calculateCiphertext());
         if (config.tags) str.append(", \"tags\": " + Arrays.toString(tags.toLongArray()));
         str.append("}");

@@ -43,5 +43,12 @@
       <artifactId>javallier_2.10</artifactId>
       <version>0.6.0</version>
     </dependency>
+    <dependency>
+      <groupId>OPE</groupId>
+      <artifactId>OPE</artifactId>
+      <version>0.0.1</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/OPE-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
+    </dependency>
   </dependencies>
 </project>
