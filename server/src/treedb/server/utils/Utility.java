@@ -2,6 +2,9 @@ package treedb.server.utils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.UUID;
@@ -10,14 +13,15 @@ import com.google.gson.JsonElement;
 import com.n1analytics.paillier.PaillierPublicKey;
 
 public class Utility {
-    public static byte[] byteArrayStringToByteArray(String byteArray) {
-        String[] byteValues = byteArray.substring(1, byteArray.length() - 1).split(",");
-        byte[] bytes = new byte[byteValues.length];
-        for (int i = 0, len = bytes.length; i < len; i++) {
-            bytes[i] = Byte.parseByte(byteValues[i].trim());
-        }
+    public static Encoder base64Encoder = Base64.getEncoder();
+    public static Decoder base64Decoder = Base64.getDecoder();
 
-        return bytes;
+    public static String encodeBase64(byte[] data) {
+        return base64Encoder.encodeToString(data);
+    }
+
+    public static byte[] decodeBase64(String base64EncodedString) {
+        return base64Decoder.decode(base64EncodedString);
     }
 
     public static UUID UUIDFromString(String uuid) {

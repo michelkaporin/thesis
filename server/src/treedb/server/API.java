@@ -97,9 +97,10 @@ public class API {
 			return new FailureJson("No stream exists for the following ID.");
 		}
 
-		List<byte[]> results = new ArrayList<byte[]>();
+		List<String> results = new ArrayList<String>();
 		for (String key : index.getRange(fromTime, toTime)) {
-			results.add(storage.get(streamID.toString(), key));
+			byte[] retrieved = storage.get(streamID.toString(), key);
+			results.add(Utility.encodeBase64(retrieved));
 		}
 
 		return results;

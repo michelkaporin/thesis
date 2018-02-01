@@ -5,23 +5,21 @@ import com.google.gson.JsonElement;
 import com.n1analytics.paillier.PaillierPublicKey;
 
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 
 public class Utility {
-    public static List<byte[]> byteArrayStringToByteArrays(String str) {
+    public static List<byte[]> base64EncodedStringsToByteArrays(String str) {
         List<byte[]> result = new ArrayList<byte[]>();
         if (str.equals("[]")) return result;
         
-        String[] byteArrays = str.substring(1, str.length() - 1).split(",(?=\\[)");
-        for (String array : byteArrays) {
-            String[] byteValues = array.substring(1, array.length() - 1).split(",");
-            byte[] bytes = new byte[byteValues.length];
-            for (int i = 0, len = bytes.length; i < len; i++) {
-                bytes[i] = Byte.parseByte(byteValues[i].trim());
-            }
-            result.add(bytes);
+        Decoder base64Decoder = Base64.getDecoder();
+        String[] byteArrays = str.substring(1, str.length() - 1).split(","); // remove square braces and split by ','
+        for (String encodedData : byteArrays) {
+            result.add(base64Decoder.decode(encodedData.substring(1, encodedData.length() - 1))); // remove quotes
         }
 
         return result;

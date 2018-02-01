@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,7 +67,7 @@ public class TreeDB {
     }
     
     public boolean insert(String streamID, String key, byte[] data, String metadata) throws IOException {
-        String json = gson.toJson(new InsertRequest(streamID, key, data, metadata));
+        String json = gson.toJson(new InsertRequest(streamID, key, Base64.getEncoder().encodeToString(data), metadata));
         LOGGER.info(json);
 
         return Boolean.valueOf(getResult(json));
@@ -77,7 +78,7 @@ public class TreeDB {
         LOGGER.info(json);
         String result = getResult(json);
         
-        return Utility.byteArrayStringToByteArrays(result);
+        return Utility.base64EncodedStringsToByteArrays(result);
     }
 
     public String getStatistics(String streamID, long fromTime, long toTime) throws IOException {

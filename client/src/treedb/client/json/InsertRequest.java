@@ -5,10 +5,10 @@ public class InsertRequest {
 
     private String streamID;
     private String key;
-    private byte[] data;
+    private String data;
     private String metadata;
 
-    public InsertRequest(String streamID, String key, byte[] data, String metadata) {
+    public InsertRequest(String streamID, String key, String data, String metadata) {
         this.streamID = streamID;
         this.key = key;
         this.data = data;

@@ -100,10 +100,10 @@ public class Server implements Runnable {
             case "insert": {
                 String streamID = jobject.get("streamID").getAsString();
                 String key = jobject.get("key").getAsString();
-                String data = jobject.get("data").getAsJsonArray().toString();
+                String data = jobject.get("data").getAsString();
                 String metadata = jobject.get("metadata").getAsString();
 
-                return API.insert(Utility.UUIDFromString(streamID), key, Utility.byteArrayStringToByteArray(data), metadata);
+                return API.insert(Utility.UUIDFromString(streamID), key, Utility.decodeBase64(data), metadata);
             }
             case "create": {
                 int k = jobject.get("k").getAsInt();
