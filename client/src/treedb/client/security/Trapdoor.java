@@ -12,7 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import treedb.client.utils.Utility;
 
 public class Trapdoor {
-    private static final String HMAC_SHA512_ALGORITHM = "HmacSHA512";
+    private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
     private byte[] key = new byte[256];
 
     public Trapdoor() throws NoSuchAlgorithmException {
@@ -60,8 +60,8 @@ public class Trapdoor {
     }
 
     private byte[] getSignature(byte[] key, byte[] value) throws InvalidKeyException, NoSuchAlgorithmException {
-        SecretKeySpec keySpec = new SecretKeySpec(key, HMAC_SHA512_ALGORITHM);
-        Mac mac = Mac.getInstance(HMAC_SHA512_ALGORITHM);
+        SecretKeySpec keySpec = new SecretKeySpec(key, HMAC_SHA256_ALGORITHM);
+        Mac mac = Mac.getInstance(HMAC_SHA256_ALGORITHM);
         mac.init(keySpec);
         
         return mac.doFinal(value);
