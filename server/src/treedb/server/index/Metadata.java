@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Metadata implements Comparable<Metadata> {
-    private static final int EXPONENT = 2048;
+    private static final int PAILLIER_EXPONENT = 2048;
 
     public long from;
     public long to;
@@ -43,8 +43,8 @@ public class Metadata implements Comparable<Metadata> {
         this.from = from;
         this.to = to;
         
-        if (sum != null) this.sum = new EncryptedNumber(config.getPaillierContext(), sum, EXPONENT);
-        if (count != null) this.count = new EncryptedNumber(config.getPaillierContext(), count, EXPONENT);
+        if (sum != null) this.sum = new EncryptedNumber(config.getPaillierContext(), sum, PAILLIER_EXPONENT);
+        if (count != null) this.count = new EncryptedNumber(config.getPaillierContext(), count, PAILLIER_EXPONENT);
         if (min != null) this.min = min;
         if (max != null) this.max = max;
         if (firstEntryValue != null) this.firstEntryValue = firstEntryValue;
