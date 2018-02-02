@@ -8,6 +8,8 @@ public class MetadataConfiguration {
     public boolean sum;
     public boolean min;
     public boolean max;
+    public boolean first;
+    public boolean last;
     public boolean tags;
 
     private PaillierContext paillierContext;

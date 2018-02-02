@@ -50,31 +50,36 @@ public class API {
 			return new FailureJson("No stream exists for the following ID.");
 		}
 		
+		MetadataConfiguration mdConfig = index.getMetadataConfig();
 		Metadata md = null;
 		try {
 			JsonObject jobject = jsonParser.parse(metadata).getAsJsonObject();
 			long from = jobject.get("from").getAsLong();
 			long to = jobject.get("to").getAsLong();
 
-			BigInteger sum = null, count = null, min = null, max = null;
+			BigInteger sum = null, count = null, min = null, max = null, first = null, last = null;
 			BitSet tags = null;
 			JsonElement jSum = jobject.get("sum");
 			JsonElement jCount = jobject.get("count");
 			JsonElement jMin = jobject.get("min");
 			JsonElement jMax = jobject.get("max");
+			JsonElement jFirst = jobject.get("first");
+			JsonElement jLast = jobject.get("last");
 			JsonElement jTags = jobject.get("tags");
-			if (jSum != null) sum = jSum.getAsBigInteger();
-			if (jCount != null) count = jSum.getAsBigInteger();
-			if (jMin != null) min = jMin.getAsBigInteger();
-			if (jMax != null) max = jMax.getAsBigInteger();
-			if (jTags != null) tags = Utility.unmarshalBitSet(jTags.getAsJsonArray());
-			md = new Metadata(index.getMetadataConfig(), from, to, sum, count, min, max, tags);
-		} catch (JsonSyntaxException e) {
+			if (jSum != null && mdConfig.sum) sum = jSum.getAsBigInteger();
+			if (jCount != null && mdConfig.count) count = jSum.getAsBigInteger();
+			if (jMin != null && mdConfig.min) min = jMin.getAsBigInteger();
+			if (jMax != null && mdConfig.max) max = jMax.getAsBigInteger();
+			if (jFirst != null && mdConfig.first) first = jFirst.getAsBigInteger();
+			if (jLast != null && mdConfig.last) last = jLast.getAsBigInteger();
+			if (jTags != null && mdConfig.tags) tags = Utility.unmarshalBitSet(jTags.getAsJsonArray());
+			md = new Metadata(mdConfig, from, to, sum, count, min, max, first, last, tags);
+		} catch (Exception e) {
 			return new FailureJson("JSON provided for metadata is incorrect.");
 		}
 		
 		// Check config match
-		if (!md.matchesConfig(index.getMetadataConfig())) {
+		if (!md.matchesConfig(mdConfig)) {
 			return new FailureJson("Metadata provided does not match metadata configuration for this stream.");
 		}
 

@@ -7,9 +7,10 @@ import treedb.server.utils.Utility;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 
-public class Metadata {
+public class Metadata implements Comparable<Metadata> {
     private static final int EXPONENT = 2048;
 
     public long from;
@@ -19,6 +20,8 @@ public class Metadata {
 	public EncryptedNumber count;
 	public BigInteger min;
     public BigInteger max;
+    public BigInteger firstEntryValue;
+    public BigInteger lastEntryValue;
     public BitSet tags;
     
     public Metadata() {
@@ -27,30 +30,29 @@ public class Metadata {
         this.sum = null;
         this.count = null;
         this.tags = null;
+        this.firstEntryValue = null;
+        this.lastEntryValue = null;
     }
 
-    public Metadata(MetadataConfiguration config, long from, long to, BigInteger sum, BigInteger count, BigInteger min, BigInteger max, BitSet tags) {
+    public Metadata(MetadataConfiguration config, 
+        long from, long to, 
+        BigInteger sum, BigInteger count, 
+        BigInteger min, BigInteger max, 
+        BigInteger firstEntryValue, BigInteger lastEntryValue,
+        BitSet tags) {
         this.from = from;
         this.to = to;
         
-        if (sum != null) {
-            this.sum = new EncryptedNumber(config.getPaillierContext(), sum, EXPONENT);
-        }
-        if (count != null) {
-            this.count = new EncryptedNumber(config.getPaillierContext(), count, EXPONENT);
-        }
-        if (min != null) {
-            this.min = min;
-        }
-        if (max != null) {
-            this.max = max;
-        }
-        if (tags != null) {
-            this.tags = tags;
-        }
+        if (sum != null) this.sum = new EncryptedNumber(config.getPaillierContext(), sum, EXPONENT);
+        if (count != null) this.count = new EncryptedNumber(config.getPaillierContext(), count, EXPONENT);
+        if (min != null) this.min = min;
+        if (max != null) this.max = max;
+        if (firstEntryValue != null) this.firstEntryValue = firstEntryValue;
+        if (lastEntryValue != null) this.lastEntryValue = lastEntryValue;
+        if (tags != null) this.tags = tags;
     }
 
-    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, BigInteger min, BigInteger max, BitSet tags) {
+    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, BigInteger min, BigInteger max, BigInteger firstEntryValue, BigInteger lastEntryValue, BitSet tags) {
         this.from = from;
         this.to = to;
         
@@ -58,6 +60,8 @@ public class Metadata {
         this.count = count;
         this.min = min;
         this.max = max;
+        this.firstEntryValue = firstEntryValue;
+        this.lastEntryValue = lastEntryValue;
         this.tags = tags;
     }
 
@@ -66,6 +70,8 @@ public class Metadata {
             || (config.max && max == null)
             || (config.min && min == null)
             || (config.sum && sum == null)
+            || (config.first && firstEntryValue == null)
+            || (config.last && lastEntryValue == null)
             || (config.tags && tags == null)) {
             return false;
         }
@@ -98,40 +104,41 @@ public class Metadata {
         if (config.max) {
             updateTo.max = updateTo.max == null ? updateFrom.max : updateTo.max.max(updateFrom.max);
         }
+        if (config.first && updateTo.firstEntryValue == null) {
+            updateTo.firstEntryValue = updateFrom.firstEntryValue; 
+        }
+        if (config.last) {
+            updateTo.lastEntryValue = updateFrom.lastEntryValue;
+        }
     }
 
     public static Metadata consolidate(MetadataConfiguration config, List<Metadata> metadata) {
         long from = Long.MAX_VALUE, to = Long.MIN_VALUE;
         EncryptedNumber sum = null, count = null;
-        BigInteger min = null, max = null;
+        BigInteger min = null, max = null, first = null, last = null;
         BitSet bs = new BitSet();
 
         for (Metadata md : metadata) {
-            if (md.from < from) {
-                from = md.from;
-            }
-            if (md.to > to) {
-                to = md.to;
-            }
+            if (md.from < from) from = md.from;
+            if (md.to > to) to = md.to;
 
-            if (config.sum) {
-                sum = sum == null ? md.sum : sum.add(md.sum);
-            }
-            if (config.count) {
-                count = count == null ? md.count : count.add(md.count);
-            }
-            if (config.tags) {
-                Utility.mergeBitSet(md.tags, bs);
-            }
-            if (config.min) {
-                min = min == null ? md.min : md.min.min(min);
-            }
-            if (config.min) {
-                max = max == null ? md.max : md.max.max(max);
-            }
+            if (config.sum) sum = sum == null ? md.sum : sum.add(md.sum);
+            if (config.count) count = count == null ? md.count : count.add(md.count);
+            if (config.min) min = min == null ? md.min : md.min.min(min);
+            if (config.max) max = max == null ? md.max : md.max.max(max);
+            if (config.tags) Utility.mergeBitSet(md.tags, bs);
+        }
+        boolean sorted = false;
+        if (config.first) {
+            Collections.sort(metadata);
+            first = metadata.get(0).firstEntryValue;
+        }
+        if (config.last) {
+            if (!sorted) Collections.sort(metadata);
+            last = metadata.get(metadata.size()-1).lastEntryValue;
         }
 
-        return new Metadata(from, to, sum, count, min, max, bs);
+        return new Metadata(from, to, sum, count, min, max, first, last, bs);
     }
 
     public String toJson(MetadataConfiguration config) {
@@ -139,12 +146,24 @@ public class Metadata {
         str.append("{");
         str.append(String.format("\"from\": %s, \"to\": %s", from, to));
         if (config.sum) str.append(", \"sum\": " + sum.calculateCiphertext());
-        if (config.min && min != null) str.append(", \"min\": " + min); // != null safety check while min/max implementation in progress
-        if (config.max && min != null) str.append(", \"max\": " + max);
+        if (config.min) str.append(", \"min\": " + min);
+        if (config.max) str.append(", \"max\": " + max);
         if (config.count) str.append(", \"count\": " + count.calculateCiphertext());
+        if (config.first) str.append(", \"first\": " + firstEntryValue);
+        if (config.last) str.append(", \"last\": " + lastEntryValue);
         if (config.tags) str.append(", \"tags\": " + Arrays.toString(tags.toLongArray()));
         str.append("}");
 
         return str.toString();
     }
+
+	@Override
+	public int compareTo(Metadata md) {
+        if (from < md.from) {
+            return -1;
+        } else if (from > md.from) {
+            return 1;
+        }
+        return 0;
+	}
 }

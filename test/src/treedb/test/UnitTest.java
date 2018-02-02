@@ -81,7 +81,7 @@ public class UnitTest {
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
 			BigInteger max = ope.encrypt(BigInteger.valueOf(to));
 
-            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, tags));
+            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, null, null, tags));
             assertEquals(true, res);
         }
     }
@@ -102,7 +102,7 @@ public class UnitTest {
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
 			BigInteger max = ope.encrypt(BigInteger.valueOf(to));
-            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, tags));
+            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, null, null, tags));
             assertEquals(true, res);
         }
 
@@ -146,15 +146,13 @@ public class UnitTest {
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
 			BigInteger max = ope.encrypt(BigInteger.valueOf(to));
-            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, tags));
+            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, null, null, tags));
             assertEquals(true, res);
         }
 
         // Retrieve a range
 		long from = 2;
 		long to = 7;
-
-		System.out.format("\nRetrieving %s..%s\n", from, to);
         List<byte[]> retrievedRange = client.getRange(streamID, from, to);
         
         int i = 1;
@@ -164,7 +162,46 @@ public class UnitTest {
         }
     }
 
-    private String getMetadataJson(long from, long to, BigInteger sum, BigInteger count, BigInteger min, BigInteger max, String tags) {
-        return String.format("{ 'from': %s, 'to': %s, 'sum': %s, 'count': %s, 'min': %s, 'max': %s, 'tags': %s }", from, to, sum, count, min, max, tags);
+    @Test
+    public void firstLastChunkEntry() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        // Create stream
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'first': true, 'last': true, 'tags': true }", keys.publicKey);
+        assertNotNull(streamID);
+
+        // Perform insert
+        for (int i = 1; i < 16; i += 2) {
+			long from = i;
+			long to = i+1;
+			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+            String keyAndData = String.format("%s-%s", from, to);
+            String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
+			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
+            BigInteger max = ope.encrypt(BigInteger.valueOf(to));
+            BigInteger first = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(from)));
+            BigInteger last = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(to)));
+            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, first, last, tags));
+            assertEquals(true, res);
+        }
+
+        // Retrieve values of the first and last entry of the range
+        long from = 7;
+		long to = 12;
+        String metadataResult = client.getStatistics(streamID, from, to);
+        
+		JsonParser parser = new JsonParser();
+		JsonObject jObj = parser.parse(metadataResult).getAsJsonObject();
+		BigInteger first = jObj.get("first").getAsBigInteger();
+        BigInteger last = jObj.get("last").getAsBigInteger();
+        
+        System.out.println(keys.privateKey.raw_decrypt(first));
+        System.out.println(keys.privateKey.raw_decrypt(last));
+        
+        assertEquals(BigInteger.valueOf(from), keys.privateKey.raw_decrypt(first));
+        assertEquals(BigInteger.valueOf(to), keys.privateKey.raw_decrypt(last));
+    }
+
+    private String getMetadataJson(long from, long to, BigInteger sum, BigInteger count, BigInteger min, BigInteger max, BigInteger first, BigInteger last, String tags) {
+        return String.format("{ 'from': %s, 'to': %s, 'sum': %s, 'count': %s, 'min': %s, 'max': %s, 'first': %s, 'last': %s, 'tags': %s }", from, to, sum, count, min, max, first, last, tags);
     }
 }
