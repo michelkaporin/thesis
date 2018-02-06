@@ -57,21 +57,79 @@ struct bsgs_table_s {
 typedef struct bsgs_table_s *bsgs_table_ptr;
 typedef struct bsgs_table_s bsgs_table_t[1];
 
-
+/**
+ * Inits the library with the given curve
+ */
 int gamal_init(int curve_id);
+
+/**
+ * Deinits the library
+ * @return
+ */
 int gamal_deinit();
+
+/**
+ * Returns the EC_Group (elliptic curve group) struct if initialized
+ */
 EC_GROUP *gamal_get_current_group();
+
+/**
+ * Returns the encded size of an EC-Point in this group.
+ */
 int gamal_get_point_compressed_size();
+
+/**
+ * Inititlaizes the baby-step-giant-step table.
+ * @param the table
+ * @param the number of elemnts to store in the table
+ * @return
+ */
 int gamal_init_bsgs_table(bsgs_table_t table, dig_t size);
+
+/**
+ * Frees the memory of the table
+ * @param table
+ * @return
+ */
 int gamal_free_bsgs_table(bsgs_table_t table);
 
 int gamal_key_clear(gamal_key_t keys);
 int gamal_cipher_clear(gamal_ciphertext_t cipher);
 int gamal_cipher_new(gamal_ciphertext_t cipher);
 
+/**
+ * Generates an EC-Elgamal key pair
+ * @param keys the EC-ElGamal keypair
+ * @return
+ */
 int gamal_generate_keys(gamal_key_t keys);
+
+/**
+ * Encrypts an Integer with additadive homomorphic EC-ElGamal
+ * @param ciphertext
+ * @param key
+ * @param plaintext
+ * @return
+ */
 int gamal_encrypt(gamal_ciphertext_t ciphertext, gamal_key_t key, dig_t plaintext);
+
+/**
+ * Decrypts an EC-Elgamal ciphertext
+ * @param res the resulting plaintext integer
+ * @param key
+ * @param ciphertext
+ * @param table if NULL bruteforce is used
+ * @return
+ */
 int gamal_decrypt(dig_t *res, gamal_key_t key, gamal_ciphertext_t ciphertext, bsgs_table_t table);
+
+/**
+ * Adds two EC-Elgamal ciphertext and stores it in res.
+ * @param res the resulting ciphertext
+ * @param ciphertext1
+ * @param ciphertext2
+ * @return
+ */
 int gamal_add(gamal_ciphertext_t res, gamal_ciphertext_t ciphertext1, gamal_ciphertext_t ciphertext2);
 
 #endif //ECELGAMAL_ECELGAMAL_H

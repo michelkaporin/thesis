@@ -8,8 +8,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/out)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
-add_executable(ecelgamal main.cpp ecelgamal.h ecelgamal.c crtecelgamal.c crtecelgamal.h)
+add_executable(ecelgamal testing.cpp ecelgamal.h ecelgamal.c crtecelgamal.c crtecelgamal.h)
 add_library(ecelgamal-jni-wrapper SHARED crtecelgamal_jni_wrapper.c ecelgamal.h ecelgamal.c)
+add_library(ecelgamal-lib SHARED ecelgamal.h ecelgamal.c crtecelgamal.c crtecelgamal.h)
 
 target_link_libraries(ecelgamal crypto ssl)
 target_link_libraries(ecelgamal-jni-wrapper crypto ssl)
+target_link_libraries(ecelgamal-lib  crypto ssl)

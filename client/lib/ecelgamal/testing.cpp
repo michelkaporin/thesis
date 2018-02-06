@@ -12,32 +12,6 @@ extern "C" {
 
 using namespace std::chrono;
 
-struct my_struct {
-    unsigned char *key;            /* we'll use this field as the key */
-    uint64_t value;
-    UT_hash_handle hh; /* makes this structure hashable */
-};
-
-struct my_struct *table = NULL;
-
-int test_hash() {
-    struct my_struct *s =  (struct my_struct *) malloc(sizeof(struct my_struct));
-    struct my_struct *after;
-    unsigned char *key = (unsigned char *) malloc(50);
-    for (int iter = 0; iter < 50; iter ++) {
-        key[iter] = (unsigned char) iter;
-    }
-
-    s->value = 10;
-    s->key = key;
-
-    HASH_ADD_KEYPTR(hh, table, key, 50, s);
-    HASH_FIND_BIN(table, key, 50, after);
-
-    std::cout << "FOUND NUM  " << after->value << std::endl;
-    return 0;
-}
-
 int test1() {
     gamal_key_t key, key_decoded;
     gamal_ciphertext_t cipher, cipher_after;
@@ -215,7 +189,6 @@ int main() {
     //test1();
     //test2();
     //test2();
-    //test_hash();
     //bench_elgamal(100, 17);
     bench_crtelgamal(1000, 10, 64);
     return 0;

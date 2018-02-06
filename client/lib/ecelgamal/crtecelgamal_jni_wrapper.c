@@ -35,12 +35,12 @@ void get_cipher(JNIEnv *env, gamal_ciphertext_t cipher, jbyteArray array) {
 
 bsgs_table_t *table = NULL;
 
-jint Java_crypto_PRERelic_initPre(JNIEnv *env,
+jint Java_treedb_client_security_ECElGamal_initPre(JNIEnv *env,
                                   jobject javaThis, jint curve_id) {
     return (jint) gamal_init((int) curve_id);
 }
 
-jint Java_crypto_PRERelic_deinitPre(JNIEnv *env,
+jint Java_treedb_client_security_ECElGamal_deinitPre(JNIEnv *env,
                                     jobject javaThis) {
     if (table != NULL) {
         gamal_free_bsgs_table(*table);
@@ -49,7 +49,7 @@ jint Java_crypto_PRERelic_deinitPre(JNIEnv *env,
     return (jint) gamal_deinit();
 }
 
-jbyteArray Java_crypto_PRERelic_generateKey(JNIEnv *env, jobject javaThis) {
+jbyteArray Java_treedb_client_security_ECElGamal_generateKey(JNIEnv *env, jobject javaThis) {
     gamal_key_t key;
     unsigned char *buffer;
     size_t key_size;
@@ -66,7 +66,7 @@ jbyteArray Java_crypto_PRERelic_generateKey(JNIEnv *env, jobject javaThis) {
     return res;
 }
 
-jbyteArray Java_crypto_PRERelic_encrypt(JNIEnv *env,
+jbyteArray Java_treedb_client_security_ECElGamal_encrypt(JNIEnv *env,
                                         jobject javaThis, jlong value,
                                         jbyteArray key_oct) {
     gamal_key_t key;
@@ -89,7 +89,7 @@ jbyteArray Java_crypto_PRERelic_encrypt(JNIEnv *env,
     return res;
 }
 
-jlong Java_crypto_PRERelic_decrypt(JNIEnv *env, jobject javaThis, jbyteArray ciphertext_oct,
+jlong Java_treedb_client_security_ECElGamal_decrypt(JNIEnv *env, jobject javaThis, jbyteArray ciphertext_oct,
                                    jbyteArray key_oct, jboolean use_bsgs) {
     gamal_key_t key;
     gamal_ciphertext_t ciphertext;
@@ -118,7 +118,7 @@ jlong Java_crypto_PRERelic_decrypt(JNIEnv *env, jobject javaThis, jbyteArray cip
     return (jlong) value;
 }
 
-jbyteArray Java_crypto_PRERelic_homAdd(JNIEnv *env, jobject javaThis, jbyteArray ciphertext_1_oct,
+jbyteArray Java_treedb_client_security_ECElGamal_homAdd(JNIEnv *env, jobject javaThis, jbyteArray ciphertext_1_oct,
                                        jbyteArray ciphertext_2_oct) {
     gamal_ciphertext_t ciphertext1, ciphertext2;
     unsigned char *buffer;
@@ -141,13 +141,13 @@ jbyteArray Java_crypto_PRERelic_homAdd(JNIEnv *env, jobject javaThis, jbyteArray
     return res;
 }
 
-jint Java_crypto_PRERelic_initBsgsTable(JNIEnv *env, jobject javaThis,
+jint Java_treedb_client_security_ECElGamal_initBsgsTable(JNIEnv *env, jobject javaThis,
                                         jint table_size) {
     table = malloc(sizeof(bsgs_table_t));
     gamal_init_bsgs_table(*table, (dig_t) table_size);
     return 0;
 }
 
-jint Java_crypto_PRERelic_getPointSize(JNIEnv *env, jobject javaThis) {
+jint Java_treedb_client_security_ECElGamal_getPointSize(JNIEnv *env, jobject javaThis) {
     return gamal_get_point_compressed_size();
 }
