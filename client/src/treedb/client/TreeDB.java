@@ -37,7 +37,7 @@ public class TreeDB {
 
         gson = new Gson();
         jsonParser = new JsonParser();
-        LOGGER.setLevel(Level.ALL);
+        LOGGER.setLevel(Level.SEVERE);
     }
 
     public void openConnection() throws IOException {

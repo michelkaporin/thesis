@@ -9,6 +9,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
@@ -29,6 +30,7 @@ public class Server implements Runnable {
         initChannel(ip, port);
         gson = new Gson();
         jsonParser = new JsonParser();
+        LOGGER.setLevel(Level.SEVERE);
     }
     
     public void run() {
