@@ -145,10 +145,16 @@ public class Metadata implements Comparable<Metadata> {
         StringBuilder str = new StringBuilder();
         str.append("{");
         str.append(String.format("\"from\": %s, \"to\": %s", from, to));
-        if (config.sum) str.append(", \"sum\": " + sum.calculateCiphertext());
+        if (config.sum) {
+            BigInteger sum = this.sum == null ? null : this.sum.calculateCiphertext();
+            str.append(", \"sum\": " + sum);
+        }
         if (config.min) str.append(", \"min\": " + min);
         if (config.max) str.append(", \"max\": " + max);
-        if (config.count) str.append(", \"count\": " + count.calculateCiphertext());
+        if (config.count) {
+            BigInteger count = this.count == null ? null : this.count.calculateCiphertext();
+            str.append(", \"count\": " + count);
+        }
         if (config.first) str.append(", \"first\": " + firstEntryValue);
         if (config.last) str.append(", \"last\": " + lastEntryValue);
         if (config.tags) str.append(", \"tags\": " + Arrays.toString(tags.toLongArray()));

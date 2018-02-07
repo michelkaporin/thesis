@@ -52,13 +52,17 @@ public class Tree {
 		}
 
 		Node previousNode = insertNode;
-		while (lastLevelNode != null && lastLevelNode.children.size() >= k) {
-			Node newLevelNode = new Node();
-			newLevelNode.children.add(previousNode);
-			previousNode.parent = newLevelNode;
-			lastNodes.set(currentLevel, newLevelNode); // update last node on the current level
-			this.updateMetadata(previousNode); // update metadata for newly created node
-			previousNode = newLevelNode; // Update reference to the node that needs to be connected later on			
+		while (lastLevelNode != null) {
+			if (lastLevelNode.children.size() >= k) {
+				Node newLevelNode = new Node();
+				newLevelNode.children.add(previousNode);
+				previousNode.parent = newLevelNode;
+				lastNodes.set(currentLevel, newLevelNode); // update last node on the current level
+				previousNode = newLevelNode; // Update reference to the node that needs to be connected later on
+			} else {
+				lastNodes.get(currentLevel).children.add(previousNode);
+				previousNode.parent = lastNodes.get(currentLevel);
+			}
 
 			// Navigate to the upper level in the tree
 			currentLevel += 1;
@@ -79,8 +83,9 @@ public class Tree {
 			previousNode.parent = root;
 			lastNodes.add(root);
 			this.updateMetadata(lastRoot);
-			this.updateMetadata(previousNode);
 		}
+
+		this.updateMetadata(insertNode); // update tree metadata for newly created node		
 	}
 
 	public List<String> getRange(long from, long to) throws IllegalArgumentException {
