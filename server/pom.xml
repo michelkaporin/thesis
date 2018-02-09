@@ -65,5 +65,10 @@
       <artifactId>javallier_2.10</artifactId>
       <version>0.6.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>1.11.273</version>
+    </dependency>
   </dependencies>
 </project>

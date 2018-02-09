@@ -26,11 +26,12 @@ public class Server implements Runnable {
     private Gson gson;
     private JsonParser jsonParser;
     
-    public Server(String ip, int port) throws IOException {
+    public Server(String ip, int port, String[] args) throws IOException {
         initChannel(ip, port);
         gson = new Gson();
         jsonParser = new JsonParser();
         LOGGER.setLevel(Level.SEVERE);
+        API.init(args);
     }
     
     public void run() {
@@ -111,8 +112,14 @@ public class Server implements Runnable {
                 int k = jobject.get("k").getAsInt();
                 String contract = jobject.get("contract").getAsString();
                 String pubKeyModulus = jobject.get("modulus").getAsString();
+                String storage;
+                try { 
+                    storage = jobject.get("storage").getAsString();
+                } catch (Exception e) {
+                    storage = "";
+                }
 
-                return API.createStream(k, contract, Utility.unmarshalPublicKey(pubKeyModulus));
+                return API.createStream(k, contract, Utility.unmarshalPublicKey(pubKeyModulus), storage.toLowerCase());
             }
             case "getrange": {
                 String streamID = jobject.get("streamID").getAsString();

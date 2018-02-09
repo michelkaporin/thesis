@@ -59,13 +59,13 @@ public class UnitTest {
 
     @Test
     public void createStream() throws IOException {
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
         assertNotNull(streamID);
     }
 
     @Test
     public void insert() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
         assertNotNull(streamID);
 
         for (int i = 1; i < 16; i += 2) {
@@ -89,7 +89,7 @@ public class UnitTest {
     @Test
     public void getStatistics() throws InvalidKeyException, NoSuchAlgorithmException, IOException {
         // Create stream
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
         assertNotNull(streamID);
 
         // Perform insert
@@ -133,7 +133,7 @@ public class UnitTest {
     @Test
     public void getRange() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         // Create stream
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
         assertNotNull(streamID);
 
         // Perform insert
@@ -165,7 +165,7 @@ public class UnitTest {
     @Test
     public void firstLastChunkEntry() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         // Create stream
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'first': true, 'last': true, 'tags': true }", keys.publicKey);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'first': true, 'last': true, 'tags': true }", keys.publicKey, null);
         assertNotNull(streamID);
 
         // Perform insert

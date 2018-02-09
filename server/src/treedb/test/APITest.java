@@ -19,7 +19,7 @@ public class APITest {
 		
 		// Create and populate stream
 		String jsonContract = "{ 'count': true, 'sum': true, 'min': false, 'max': false }";
-		String streamID = (String) API.createStream(2, jsonContract, pubKey);
+		String streamID = (String) API.createStream(2, jsonContract, pubKey, null);
 		
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;

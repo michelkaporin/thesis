@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.n1analytics.paillier.PaillierPublicKey;
+
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -17,6 +19,7 @@ import treedb.server.index.Metadata;
 import treedb.server.index.MetadataConfiguration;
 import treedb.server.index.Tree;
 import treedb.server.storage.FileSystem;
+import treedb.server.storage.S3;
 import treedb.server.storage.Storage;
 import treedb.server.utils.FailureJson;
 import treedb.server.utils.Utility;
@@ -26,11 +29,25 @@ public class API {
 	private static Map<UUID, Tree> indexMap = new HashMap<UUID, Tree>();
 	private static Storage storage;
 	private static Gson gson = new Gson();
-    private static JsonParser jsonParser = new JsonParser();
+	private static JsonParser jsonParser = new JsonParser();
+	private static String[] arguments;
 
-	public static Object createStream(int k, String json, PaillierPublicKey pubKey) {
+	public static void init(String[] args)
+    {
+        arguments = args;
+    }
+
+	public static Object createStream(int k, String json, PaillierPublicKey pubKey, String datalayer) {
 		UUID id = UUID.randomUUID();
-		storage = new FileSystem();
+
+		switch (datalayer) {
+			case "s3":
+				storage = new S3(id.toString(), arguments);
+				break;
+			default: 
+				storage = new FileSystem();
+				break;
+		}
 
 		MetadataConfiguration mc = null;
 		try {
@@ -104,8 +121,13 @@ public class API {
 
 		List<String> results = new ArrayList<String>();
 		for (String key : index.getRange(fromTime, toTime)) {
-			byte[] retrieved = storage.get(streamID.toString(), key);
-			results.add(Utility.encodeBase64(retrieved));
+			byte[] retrieved = null;
+			try {
+				retrieved = storage.get(streamID.toString(), key);
+				results.add(Utility.encodeBase64(retrieved));
+			} catch (Exception e) {
+				return new FailureJson("Failed to retrieve the results due to: " + e.toString());
+			}
 		}
 
 		return results;

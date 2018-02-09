@@ -6,10 +6,12 @@ public class CreateStreamRequest {
     private int k;
     private String contract;
     private String modulus;
+    private String storage;
 
-    public CreateStreamRequest(int k, String contract, String publicKeyModulus) {
+    public CreateStreamRequest(int k, String contract, String publicKeyModulus, String storage) {
         this.k = k;
         this.contract = contract;
         this.modulus = publicKeyModulus;
+        this.storage = storage;
     }
 }
