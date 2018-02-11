@@ -59,7 +59,7 @@ public class IntegrationTest {
 		CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 		Trapdoor td = new Trapdoor();
 		OPE ope = new OPE(key, 64, 128);
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
 		testInsert(client, streamID, keys.publicKey, td, ope);
         testGetRange(client, streamID);
 		testGetStatistics(client, streamID, keys.privateKey, td, ope);
@@ -125,7 +125,7 @@ public class IntegrationTest {
 	}
 
 	private static void testMultipleClients(String ip, int port) throws IOException, InterruptedException {
-        Server server = new Server(ip, port);
+        Server server = new Server(ip, port, null);
 		new Thread(server).start();
 
 		ExecutorService exec = Executors.newCachedThreadPool();
