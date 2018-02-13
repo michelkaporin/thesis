@@ -30,7 +30,9 @@ public class MetadataConfiguration {
     }
 
     public void setPaillierPublicKey(PaillierPublicKey publicKey) {
-        this.paillierContext = publicKey.createSignedContext();
+        if (publicKey != null) {
+            this.paillierContext = publicKey.createSignedContext();
+        }
     }
 
     public PaillierContext getPaillierContext() {

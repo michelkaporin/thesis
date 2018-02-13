@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import com.n1analytics.paillier.PaillierPublicKey;
 import treedb.server.utils.Utility;
 
 public class Server implements Runnable {
@@ -111,15 +111,20 @@ public class Server implements Runnable {
             case "create": {
                 int k = jobject.get("k").getAsInt();
                 String contract = jobject.get("contract").getAsString();
-                String pubKeyModulus = jobject.get("modulus").getAsString();
+                
+                PaillierPublicKey pubkey = null;                
+                try {
+                    String pubKeyModulus = jobject.get("modulus").getAsString();
+                    pubkey = Utility.unmarshalPublicKey(pubKeyModulus);
+                } catch (Exception e) {}
+                
                 String storage;
                 try { 
                     storage = jobject.get("storage").getAsString();
                 } catch (Exception e) {
                     storage = "";
                 }
-
-                return API.createStream(k, contract, Utility.unmarshalPublicKey(pubKeyModulus), storage.toLowerCase());
+                return API.createStream(k, contract, pubkey, storage.toLowerCase());
             }
             case "getrange": {
                 String streamID = jobject.get("streamID").getAsString();
