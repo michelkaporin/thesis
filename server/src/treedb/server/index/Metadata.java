@@ -1,7 +1,6 @@
 package treedb.server.index;
 
-import com.n1analytics.paillier.EncryptedNumber;
-
+import treedb.server.index.crypto.HomomorphicEncryptedNumber;
 import treedb.server.utils.Utility;
 
 import java.math.BigInteger;
@@ -11,13 +10,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class Metadata implements Comparable<Metadata> {
-    private static final int PAILLIER_EXPONENT = 2048;
-
     public long from;
     public long to;
 
-	public EncryptedNumber sum;
-	public EncryptedNumber count;
+	public HomomorphicEncryptedNumber sum;
+	public HomomorphicEncryptedNumber count;
 	public BigInteger min;
     public BigInteger max;
     public BigInteger firstEntryValue;
@@ -34,25 +31,11 @@ public class Metadata implements Comparable<Metadata> {
         this.lastEntryValue = null;
     }
 
-    public Metadata(MetadataConfiguration config, 
-        long from, long to, 
-        BigInteger sum, BigInteger count, 
+    public Metadata(long from, long to, 
+        HomomorphicEncryptedNumber sum, HomomorphicEncryptedNumber count, 
         BigInteger min, BigInteger max, 
         BigInteger firstEntryValue, BigInteger lastEntryValue,
         BitSet tags) {
-        this.from = from;
-        this.to = to;
-        
-        if (sum != null) this.sum = new EncryptedNumber(config.getPaillierContext(), sum, PAILLIER_EXPONENT);
-        if (count != null) this.count = new EncryptedNumber(config.getPaillierContext(), count, PAILLIER_EXPONENT);
-        if (min != null) this.min = min;
-        if (max != null) this.max = max;
-        if (firstEntryValue != null) this.firstEntryValue = firstEntryValue;
-        if (lastEntryValue != null) this.lastEntryValue = lastEntryValue;
-        if (tags != null) this.tags = tags;
-    }
-
-    public Metadata(long from, long to, EncryptedNumber sum, EncryptedNumber count, BigInteger min, BigInteger max, BigInteger firstEntryValue, BigInteger lastEntryValue, BitSet tags) {
         this.from = from;
         this.to = to;
         
@@ -88,6 +71,7 @@ public class Metadata implements Comparable<Metadata> {
         if (config.count) {
             updateTo.count = updateTo.count == null ? updateFrom.count : updateTo.count.add(updateFrom.count);
         }
+
         if (config.sum) {
             updateTo.sum = updateTo.sum == null ? updateFrom.sum : updateTo.sum.add(updateFrom.sum);
         }
@@ -114,7 +98,7 @@ public class Metadata implements Comparable<Metadata> {
 
     public static Metadata consolidate(MetadataConfiguration config, List<Metadata> metadata) {
         long from = Long.MAX_VALUE, to = Long.MIN_VALUE;
-        EncryptedNumber sum = null, count = null;
+        HomomorphicEncryptedNumber sum = null, count = null;
         BigInteger min = null, max = null, first = null, last = null;
         BitSet bs = new BitSet();
 
@@ -146,13 +130,13 @@ public class Metadata implements Comparable<Metadata> {
         str.append("{");
         str.append(String.format("\"from\": %s, \"to\": %s", from, to));
         if (config.sum) {
-            BigInteger sum = this.sum == null ? null : this.sum.calculateCiphertext();
+            String sum = this.sum == null ? null : this.sum.toString();
             str.append(", \"sum\": " + sum);
         }
         if (config.min) str.append(", \"min\": " + min);
         if (config.max) str.append(", \"max\": " + max);
         if (config.count) {
-            BigInteger count = this.count == null ? null : this.count.calculateCiphertext();
+            String count = this.count == null ? null : this.count.toString();
             str.append(", \"count\": " + count);
         }
         if (config.first) str.append(", \"first\": " + firstEntryValue);

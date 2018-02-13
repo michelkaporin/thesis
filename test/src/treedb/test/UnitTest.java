@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import ch.ethz.inf.dsg.crypto.OPE;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import treedb.client.TreeDB;
 import treedb.client.security.CryptoKeyPair;
+import treedb.client.security.ECElGamalWrapper;
 import treedb.client.security.Trapdoor;
 import treedb.client.utils.Utility;
 
@@ -71,8 +73,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
             
             String keyAndData = String.format("%s-%s", from, to); // assume encrypted
             
@@ -96,8 +98,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
@@ -131,6 +133,35 @@ public class UnitTest {
     }
 
     @Test
+    public void ECELGamalSum() throws IOException {
+        String streamID = client.createStream(2, "{ 'sum': true, 'algorithms': { 'sum': 'ecelgamal' } }", keys.publicKey, null);
+        assertNotNull(streamID);
+        ECElGamalWrapper ECElGamal  = new ECElGamalWrapper();
+
+        // Perform insert
+        for (int i = 1; i < 16; i += 2) {
+			long from = i;
+            long to = i+1;
+            
+			String sum = ECElGamal.encryptAndEncode(BigInteger.valueOf(1));
+            String keyAndData = String.format("%s-%s", from, to);
+            String md = String.format("{ 'from': %s, 'to': %s, 'sum': '%s' }", from, to, sum);
+            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), md);
+            assertEquals(true, res);
+        }
+
+        long from = 7;
+		long to = 12;
+        String metadataResult = client.getStatistics(streamID, from, to);
+        
+		JsonParser parser = new JsonParser();
+		JsonObject jObj = parser.parse(metadataResult).getAsJsonObject();
+        String sum = jObj.get("sum").getAsString();
+        
+        assertEquals(BigInteger.valueOf(3), ECElGamal.decodeAndDecrypt(sum));
+    }
+
+    @Test
     public void getRange() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         // Create stream
         String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
@@ -140,8 +171,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
@@ -172,8 +203,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));

@@ -75,5 +75,12 @@
       <artifactId>jaxb-api</artifactId>
       <version>2.3.0</version>
     </dependency>
+    <dependency>
+      <groupId>ecelgamal</groupId>
+      <artifactId>OPE</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/ecelgamal-1.0-SNAPSHOT-jar-with-dependencies.jar</systemPath>
+    </dependency>
   </dependencies>
 </project>

@@ -82,5 +82,12 @@
       <scope>system</scope>
       <systemPath>${basedir}/lib/OPE-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>ecelgamal</groupId>
+      <artifactId>OPE</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/ecelgamal-1.0-SNAPSHOT-jar-with-dependencies.jar</systemPath>
+    </dependency>
   </dependencies>
 </project>
