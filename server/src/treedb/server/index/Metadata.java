@@ -1,6 +1,7 @@
 package treedb.server.index;
 
 import treedb.server.index.crypto.HomomorphicEncryptedNumber;
+import treedb.server.index.crypto.OrderPreservingEncryptedNumber;
 import treedb.server.utils.Utility;
 
 import java.math.BigInteger;
@@ -15,8 +16,8 @@ public class Metadata implements Comparable<Metadata> {
 
 	public HomomorphicEncryptedNumber sum;
 	public HomomorphicEncryptedNumber count;
-	public BigInteger min;
-    public BigInteger max;
+	public OrderPreservingEncryptedNumber min;
+    public OrderPreservingEncryptedNumber max;
     public BigInteger firstEntryValue;
     public BigInteger lastEntryValue;
     public BitSet tags;
@@ -33,7 +34,7 @@ public class Metadata implements Comparable<Metadata> {
 
     public Metadata(long from, long to, 
         HomomorphicEncryptedNumber sum, HomomorphicEncryptedNumber count, 
-        BigInteger min, BigInteger max, 
+        OrderPreservingEncryptedNumber min, OrderPreservingEncryptedNumber max, 
         BigInteger firstEntryValue, BigInteger lastEntryValue,
         BitSet tags) {
         this.from = from;
@@ -99,7 +100,8 @@ public class Metadata implements Comparable<Metadata> {
     public static Metadata consolidate(MetadataConfiguration config, List<Metadata> metadata) {
         long from = Long.MAX_VALUE, to = Long.MIN_VALUE;
         HomomorphicEncryptedNumber sum = null, count = null;
-        BigInteger min = null, max = null, first = null, last = null;
+        OrderPreservingEncryptedNumber min = null, max = null;
+        BigInteger first = null, last = null;
         BitSet bs = new BitSet();
 
         for (Metadata md : metadata) {
@@ -133,8 +135,8 @@ public class Metadata implements Comparable<Metadata> {
             String sum = this.sum == null ? null : this.sum.toString();
             str.append(", \"sum\": " + sum);
         }
-        if (config.min) str.append(", \"min\": " + min);
-        if (config.max) str.append(", \"max\": " + max);
+        if (config.min) str.append(", \"min\": " + min.toJsonString());
+        if (config.max) str.append(", \"max\": " + max.toJsonString());
         if (config.count) {
             String count = this.count == null ? null : this.count.toString();
             str.append(", \"count\": " + count);

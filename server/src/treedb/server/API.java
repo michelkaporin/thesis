@@ -1,6 +1,7 @@
 package treedb.server;
 
 import ch.ethz.dsg.ecelgamal.ECElGamal.ECElGamalCiphertext;
+import ch.ethz.dsg.ore.ORE.ORECiphertext;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,8 +21,10 @@ import java.util.UUID;
 import treedb.server.index.Metadata;
 import treedb.server.index.MetadataConfiguration;
 import treedb.server.index.enums.HomomorphicAlgorithm;
+import treedb.server.index.enums.OrderPreservingAlgorithm;
 import treedb.server.index.Tree;
 import treedb.server.index.crypto.HomomorphicEncryptedNumber;
+import treedb.server.index.crypto.OrderPreservingEncryptedNumber;
 import treedb.server.storage.FileSystem;
 import treedb.server.storage.S3;
 import treedb.server.storage.Storage;
@@ -80,7 +83,8 @@ public class API {
 			long to = jobject.get("to").getAsLong();
 
 			HomomorphicEncryptedNumber sum = null, count = null;
-			BigInteger min = null, max = null, first = null, last = null;
+			OrderPreservingEncryptedNumber min = null, max = null;
+			BigInteger first = null, last = null;
 			BitSet tags = null;
 			JsonElement jSum = jobject.get("sum");
 			JsonElement jCount = jobject.get("count");
@@ -112,8 +116,28 @@ public class API {
 					}
 				}
 			}
-			if (jMin != null && mdConfig.min) min = jMin.getAsBigInteger();
-			if (jMax != null && mdConfig.max) max = jMax.getAsBigInteger();
+			if (jMin != null && mdConfig.min) { 
+				try {
+					min = new OrderPreservingEncryptedNumber(jMin.getAsBigInteger());
+				} catch (NumberFormatException e) {
+					if (mdConfig.algorithms.min == OrderPreservingAlgorithm.ORE) {
+						min = new OrderPreservingEncryptedNumber(ORECiphertext.decodeDefault(Base64.getDecoder().decode(jMin.getAsString())));
+					} else {
+						throw e;
+					}
+				}
+			}
+			if (jMax != null && mdConfig.max) {
+				try {
+					max = new OrderPreservingEncryptedNumber(jMax.getAsBigInteger());
+				} catch (NumberFormatException e) {
+					if (mdConfig.algorithms.max == OrderPreservingAlgorithm.ORE) {
+						max = new OrderPreservingEncryptedNumber(ORECiphertext.decodeDefault(Base64.getDecoder().decode(jMax.getAsString())));
+					} else {
+						throw e;
+					}
+				}
+			}
 			if (jFirst != null && mdConfig.first) first = jFirst.getAsBigInteger();
 			if (jLast != null && mdConfig.last) last = jLast.getAsBigInteger();
 			if (jTags != null && mdConfig.tags) tags = Utility.unmarshalBitSet(jTags.getAsJsonArray());

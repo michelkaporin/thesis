@@ -82,5 +82,12 @@
       <scope>system</scope>
       <systemPath>${basedir}/lib/ecelgamal-1.0-SNAPSHOT-jar-with-dependencies.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>ore</groupId>
+      <artifactId>ORE</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/ore-java-1.0-SNAPSHOT.jar</systemPath>
+    </dependency>
   </dependencies>
 </project>

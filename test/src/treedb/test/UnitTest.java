@@ -21,6 +21,7 @@ import org.junit.Test;
 import treedb.client.TreeDB;
 import treedb.client.security.CryptoKeyPair;
 import treedb.client.security.ECElGamalWrapper;
+import treedb.client.security.OREWrapper;
 import treedb.client.security.Trapdoor;
 import treedb.client.utils.Utility;
 
@@ -37,15 +38,22 @@ public class UnitTest {
 
     private static byte[] opeKey;
     private static OPE ope;
+    private static OREWrapper ore;
+    private static ECElGamalWrapper ecelgamal;
     
     private TreeDB client;
 
     @BeforeClass
     public static void setupClass() throws IOException, NoSuchAlgorithmException {
         keys = CryptoKeyPair.generateKeyPair();
+
         td = new Trapdoor();
+
         opeKey = new byte[16];
         ope = new OPE(opeKey, 64, 128);
+
+        ecelgamal = new ECElGamalWrapper();
+        ore = new OREWrapper();
     }
 
     @Before
@@ -134,16 +142,15 @@ public class UnitTest {
 
     @Test
     public void ECELGamalSum() throws IOException {
-        String streamID = client.createStream(2, "{ 'sum': true, 'algorithms': { 'sum': 'ecelgamal' } }", keys.publicKey, null);
+        String streamID = client.createStream(2, "{ 'sum': true, 'algorithms': { 'sum': 'ecelgamal' } }", null, null);
         assertNotNull(streamID);
-        ECElGamalWrapper ECElGamal  = new ECElGamalWrapper();
 
         // Perform insert
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
             long to = i+1;
             
-			String sum = ECElGamal.encryptAndEncode(BigInteger.valueOf(1));
+			String sum = ecelgamal.encryptAndEncode(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String md = String.format("{ 'from': %s, 'to': %s, 'sum': '%s' }", from, to, sum);
             boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), md);
@@ -158,7 +165,38 @@ public class UnitTest {
 		JsonObject jObj = parser.parse(metadataResult).getAsJsonObject();
         String sum = jObj.get("sum").getAsString();
         
-        assertEquals(BigInteger.valueOf(3), ECElGamal.decodeAndDecrypt(sum));
+        assertEquals(BigInteger.valueOf(3), ecelgamal.decodeAndDecrypt(sum));
+    }
+
+    @Test
+    public void OREMinMax() throws Exception {
+        String streamID = client.createStream(2, "{ 'min': true, 'max': true, 'algorithms': { 'min': 'ore', 'max': 'ore' } }", null, null);
+        assertNotNull(streamID);
+
+        // Perform insert
+        for (int i = 1; i < 16; i += 2) {
+			long from = i;
+            long to = i+1;
+
+			String min = ore.encryptAndEncode(BigInteger.valueOf(from)); 
+			String max =  ore.encryptAndEncode(BigInteger.valueOf(to));
+            String keyAndData = String.format("%s-%s", from, to);
+            String md = String.format("{ 'from': %s, 'to': %s, 'min': '%s', 'max': '%s' }", from, to, min, max);
+            boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), md);
+            assertEquals(true, res);
+        }
+
+        long from = 7;
+		long to = 12;
+        String metadataResult = client.getStatistics(streamID, from, to);
+        
+		JsonParser parser = new JsonParser();
+		JsonObject jObj = parser.parse(metadataResult).getAsJsonObject();
+		String min = jObj.get("min").getAsString();
+        String max = jObj.get("max").getAsString();
+        
+        assertEquals(BigInteger.valueOf(7), ore.decodeAndDecrypt(min));
+        assertEquals(BigInteger.valueOf(12), ore.decodeAndDecrypt(max));
     }
 
     @Test

@@ -40,10 +40,10 @@ public class MetadataConfiguration {
     }
 
     public class CryptoAlgorithmsConfiguration {
-        public final OrderPreservingAlgorithm min;
-        public final OrderPreservingAlgorithm max;
         public final HomomorphicAlgorithm sum;
         public final HomomorphicAlgorithm count;
+        public final OrderPreservingAlgorithm min;
+        public final OrderPreservingAlgorithm max;
 
         public CryptoAlgorithmsConfiguration(OrderPreservingAlgorithm min, OrderPreservingAlgorithm max, HomomorphicAlgorithm sum, HomomorphicAlgorithm count) {
             this.min = min;

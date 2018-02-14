@@ -5,7 +5,7 @@ import ch.ethz.dsg.ecelgamal.ECElGamal.ECElGamalCiphertext;
 import com.n1analytics.paillier.EncryptedNumber;
 import java.util.Base64;
 
-public class HomomorphicEncryptedNumber {
+public class HomomorphicEncryptedNumber implements treedb.server.index.crypto.EncryptedNumber {
 
     private Object number;
 
@@ -21,22 +21,6 @@ public class HomomorphicEncryptedNumber {
         return this.number;
     }
 
-    public boolean isPaillierEncrypted() {
-        if (this.number instanceof EncryptedNumber) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean isECELGamalEncrypted() {
-        if (this.number instanceof ECElGamalCiphertext) {
-            return true;
-        }
-        
-        return false;
-    }
-
     public HomomorphicEncryptedNumber add(HomomorphicEncryptedNumber number) {
         if (!sameTypes(number)) {
             throw new RuntimeException("Objects have different types, summation is not possible.");
@@ -49,12 +33,29 @@ public class HomomorphicEncryptedNumber {
         return new HomomorphicEncryptedNumber(ECElGamal.add((ECElGamalCiphertext) this.number, (ECElGamalCiphertext) number.getValue()));
     }
 
-    public String toString() {
+    public String toJsonString() {
         if (isPaillierEncrypted()) {
             return ((EncryptedNumber) this.number).calculateCiphertext().toString();
         }
         
         return "\"" + Base64.getEncoder().encodeToString(((ECElGamalCiphertext) this.number).encode()) + "\"";
+    }
+
+
+    private boolean isPaillierEncrypted() {
+        if (this.number instanceof EncryptedNumber) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isECELGamalEncrypted() {
+        if (this.number instanceof ECElGamalCiphertext) {
+            return true;
+        }
+        
+        return false;
     }
 
     private boolean sameTypes(HomomorphicEncryptedNumber number) {
