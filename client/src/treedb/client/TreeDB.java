@@ -61,7 +61,7 @@ public class TreeDB {
 
     public String createStream(int k, String contract, PaillierPublicKey pubKey, String storage) throws IOException {
         String publicKey = null;
-        if (pubKey != null) Utility.marshalPaillierPublicKey(pubKey);
+        if (pubKey != null) publicKey = Utility.marshalPaillierPublicKey(pubKey);
         String json = gson.toJson(new CreateStreamRequest(k, contract, publicKey, storage));
         LOGGER.info(json);
         String result = getResult(json);

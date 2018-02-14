@@ -132,13 +132,13 @@ public class Metadata implements Comparable<Metadata> {
         str.append("{");
         str.append(String.format("\"from\": %s, \"to\": %s", from, to));
         if (config.sum) {
-            String sum = this.sum == null ? null : this.sum.toString();
+            String sum = this.sum == null ? null : this.sum.toJsonString();
             str.append(", \"sum\": " + sum);
         }
         if (config.min) str.append(", \"min\": " + min.toJsonString());
         if (config.max) str.append(", \"max\": " + max.toJsonString());
         if (config.count) {
-            String count = this.count == null ? null : this.count.toString();
+            String count = this.count == null ? null : this.count.toJsonString();
             str.append(", \"count\": " + count);
         }
         if (config.first) str.append(", \"first\": " + firstEntryValue);
