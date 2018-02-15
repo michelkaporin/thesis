@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import ch.ethz.inf.dsg.crypto.OPE;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,6 +18,7 @@ import com.n1analytics.paillier.PaillierPublicKey;
 
 import treedb.client.TreeDB;
 import treedb.client.security.CryptoKeyPair;
+import treedb.client.security.OPEWrapper;
 import treedb.client.security.Trapdoor;
 import treedb.client.utils.Utility;
 import treedb.server.Server;
@@ -58,7 +58,7 @@ public class IntegrationTest {
 		byte[] key = new byte[16];
 		CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 		Trapdoor td = new Trapdoor();
-		OPE ope = new OPE(key, 64, 128);
+		OPEWrapper ope = new OPEWrapper();
         String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
 		testInsert(client, streamID, keys.publicKey, td, ope);
         testGetRange(client, streamID);
@@ -68,7 +68,7 @@ public class IntegrationTest {
 		// server.terminate();
 	}
 
-	private static void testInsert(TreeDB client, String streamID, PaillierPublicKey pubKey, Trapdoor td, OPE ope) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+	private static void testInsert(TreeDB client, String streamID, PaillierPublicKey pubKey, Trapdoor td, OPEWrapper ope) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
@@ -86,7 +86,7 @@ public class IntegrationTest {
         }
 	}
 	
-	private static void testGetStatistics(TreeDB client, String streamID, PaillierPrivateKey privKey, Trapdoor td, OPE ope) throws Exception {
+	private static void testGetStatistics(TreeDB client, String streamID, PaillierPrivateKey privKey, Trapdoor td, OPEWrapper ope) throws Exception {
 		long from = 7;
 		long to = 12;
 		System.out.format("Querying for stats in %s..%s\n", from, to);
@@ -140,7 +140,7 @@ public class IntegrationTest {
 		
 					CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 					Trapdoor td = new Trapdoor();
-					OPE ope = new OPE(new byte[16], 64, 128);
+					OPEWrapper ope = new OPEWrapper();
 					//String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true }");
 					//testInsert(client, streamID);
 					//testGetRange(client, streamID);
