@@ -3,8 +3,6 @@ package treedb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import ch.ethz.inf.dsg.crypto.OPE;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -21,6 +19,7 @@ import org.junit.Test;
 import treedb.client.TreeDB;
 import treedb.client.security.CryptoKeyPair;
 import treedb.client.security.ECElGamalWrapper;
+import treedb.client.security.OPEWrapper;
 import treedb.client.security.OREWrapper;
 import treedb.client.security.Trapdoor;
 import treedb.client.utils.Utility;
@@ -36,8 +35,7 @@ public class UnitTest {
     private final static double BF_FALSEPOSITIVE_PROBABILITY = 0.01;
     private final static int BF_EXPECTED_NUM_OF_TAGS = 16;
 
-    private static byte[] opeKey;
-    private static OPE ope;
+    private static OPEWrapper ope;
     private static OREWrapper ore;
     private static ECElGamalWrapper ecelgamal;
     
@@ -49,8 +47,7 @@ public class UnitTest {
 
         td = new Trapdoor();
 
-        opeKey = new byte[16];
-        ope = new OPE(opeKey, 64, 128);
+        ope = new OPEWrapper();
 
         ecelgamal = new ECElGamalWrapper();
         ore = new OREWrapper();
