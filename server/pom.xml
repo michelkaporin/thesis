@@ -60,7 +60,7 @@
             <id>install-ecelgamal</id>
             <phase>clean</phase>
             <configuration>
-              <file>${basedir}/lib/ecelgamal-1.0-SNAPSHOT-jar-with-dependencies.jar</file>
+              <file>${basedir}/../lib/ecelgamal-1.0-SNAPSHOT-jar-with-dependencies.jar</file>
               <repositoryLayout>default</repositoryLayout>
               <groupId>ecelgamal</groupId>
               <artifactId>ecelgamal</artifactId>
@@ -76,7 +76,7 @@
             <id>install-ore</id>
             <phase>clean</phase>
             <configuration>
-              <file>${basedir}/lib/ore-java-1.0-SNAPSHOT.jar</file>
+              <file>${basedir}/../lib/ore-java-1.0-SNAPSHOT.jar</file>
               <repositoryLayout>default</repositoryLayout>
               <groupId>ore</groupId>
               <artifactId>ore</artifactId>
