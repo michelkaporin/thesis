@@ -1,6 +1,7 @@
 .DS_STORE
 *.class
-storage/
+/storage/
+/test/storage/
 
 # Maven files
 target/
