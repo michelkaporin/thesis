@@ -78,8 +78,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+			BigInteger sum = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
             
             String keyAndData = String.format("%s-%s", from, to); // assume encrypted
             
@@ -103,8 +103,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+			BigInteger sum = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
@@ -206,8 +206,8 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+			BigInteger sum = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
@@ -238,14 +238,14 @@ public class UnitTest {
         for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
-            BigInteger count = keys.publicKey.raw_encrypt_without_obfuscation(BigInteger.valueOf(1));
+			BigInteger sum = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
+            BigInteger count = keys.publicKey.raw_encrypt(BigInteger.valueOf(1));
             String keyAndData = String.format("%s-%s", from, to);
             String tags = td.getFilter("test" + keyAndData, BF_FALSEPOSITIVE_PROBABILITY, BF_EXPECTED_NUM_OF_TAGS);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
             BigInteger max = ope.encrypt(BigInteger.valueOf(to));
-            BigInteger first = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(from)));
-            BigInteger last = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(to)));
+            BigInteger first = keys.publicKey.raw_encrypt(new BigInteger(String.valueOf(from)));
+            BigInteger last = keys.publicKey.raw_encrypt(new BigInteger(String.valueOf(to)));
             boolean res = client.insert(streamID, keyAndData, keyAndData.getBytes(), getMetadataJson(from, to, sum, count, min, max, first, last, tags));
             assertEquals(true, res);
         }

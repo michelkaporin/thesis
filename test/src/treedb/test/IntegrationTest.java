@@ -35,8 +35,8 @@ public class IntegrationTest {
 	
 	// private static void testEncryption() {
 	// 	CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
-	// 	BigInteger sum1 = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
-	// 	BigInteger sum2 = keys.publicKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+	// 	BigInteger sum1 = keys.publicKey.raw_encrypt(new BigInteger(String.valueOf(1)));
+	// 	BigInteger sum2 = keys.publicKey.raw_encrypt(new BigInteger(String.valueOf(1)));
 
     //     PaillierContext context = keys.publicKey.createSignedContext();
 	// 	EncryptedNumber number1 = new EncryptedNumber(context, sum1, 2048);
@@ -72,8 +72,8 @@ public class IntegrationTest {
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = pubKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
-			BigInteger count = pubKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+			BigInteger sum = pubKey.raw_encrypt(new BigInteger(String.valueOf(1)));
+			BigInteger count = pubKey.raw_encrypt(new BigInteger(String.valueOf(1)));
 			String keyAndData = String.format("%s-%s", from, to); // data should be encrypted in a non-paillier way
 			String tags = td.getFilter("test" + keyAndData, 0.01, 16);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));

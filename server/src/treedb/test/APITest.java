@@ -26,7 +26,7 @@ public class APITest {
 			long to = i+1;
 			String keyAndData = String.format("%s-%s", from, to);
 
-			BigInteger sum = pubKey.raw_encrypt_without_obfuscation(new BigInteger(String.valueOf(1)));
+			BigInteger sum = pubKey.raw_encrypt(new BigInteger(String.valueOf(1)));
 			BigInteger count = sum;
 
 			String md = String.format("{ 'from': %s, 'to': %s, 'sum': %s, 'count': %s }", from, to, sum, count);
