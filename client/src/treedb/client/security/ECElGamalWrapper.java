@@ -12,8 +12,8 @@ public class ECElGamalWrapper {
     private ECElGamalKey key;
 
     public ECElGamalWrapper() {
-        CRTParams params32 = ECElGamal.getDefault32BitParams();
-        this.key = ECElGamal.generateNewKey(params32);
+        CRTParams params64 = ECElGamal.getDefault64BitParams();
+        this.key = ECElGamal.generateNewKey(params64);
         ECElGamal.initBsgsTable(65536);
     }
 

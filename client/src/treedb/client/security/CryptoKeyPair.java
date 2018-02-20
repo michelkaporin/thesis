@@ -14,7 +14,7 @@ public class CryptoKeyPair {
     }
 
     public static CryptoKeyPair generateKeyPair() {
-        PaillierPrivateKey pKey = PaillierPrivateKey.create(2048);
+        PaillierPrivateKey pKey = PaillierPrivateKey.create(3072);
         PaillierPublicKey pubKey = pKey.getPublicKey();
 
 		return new CryptoKeyPair(pKey, pubKey);
