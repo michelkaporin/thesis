@@ -8,6 +8,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,7 +53,7 @@ public class Server implements Runnable {
                     } else if (key.isReadable()) {
                         // deserialise the message and call the API
                         SocketChannel client = (SocketChannel) key.channel();
-                        ByteBuffer buffer = ByteBuffer.allocate(51200); // 50 MB buffer max
+                        ByteBuffer buffer = ByteBuffer.allocate(102400); // 100 MB buffer max
                         int numRead = client.read(buffer);
                         if (numRead  == -1) {
                             client.close();
@@ -62,7 +63,7 @@ public class Server implements Runnable {
 
                         byte[] trimmedBytes = new byte[numRead];
                         System.arraycopy(buffer.array(), 0, trimmedBytes, 0, numRead);
-                        Object apiResult = callMethod(new String(trimmedBytes));
+                        Object apiResult = callMethod(new String(trimmedBytes, Charset.forName("UTF-8")));
                         if (apiResult != null) {
                             // write back the result to channel
                             String response = gson.toJson(apiResult);
