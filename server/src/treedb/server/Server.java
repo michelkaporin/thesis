@@ -9,13 +9,16 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.n1analytics.paillier.PaillierPublicKey;
 import treedb.server.utils.Utility;
 
@@ -27,10 +30,13 @@ public class Server implements Runnable {
     private Gson gson;
     private JsonParser jsonParser;
     
+    private Map<SocketChannel, byte[]> incompleteRequests;
+    
     public Server(String ip, int port, String[] args) throws IOException {
         initChannel(ip, port);
         gson = new Gson();
         jsonParser = new JsonParser();
+        incompleteRequests = new HashMap<SocketChannel, byte[]>();
         LOGGER.setLevel(Level.SEVERE);
         API.init(args);
     }
@@ -53,24 +59,46 @@ public class Server implements Runnable {
                     } else if (key.isReadable()) {
                         // deserialise the message and call the API
                         SocketChannel client = (SocketChannel) key.channel();
-                        ByteBuffer buffer = ByteBuffer.allocate(102400); // 100 MB buffer max
+                        ByteBuffer buffer = ByteBuffer.allocate(102400);
                         int numRead = client.read(buffer);
-                        if (numRead  == -1) {
-                            client.close();
-                            continue;
-                        }
-                        // Call the API and return the result, put it back to the readable state
 
+                        // Call the API and return the result, put it back to the readable state
                         byte[] trimmedBytes = new byte[numRead];
                         System.arraycopy(buffer.array(), 0, trimmedBytes, 0, numRead);
-                        Object apiResult = callMethod(new String(trimmedBytes, Charset.forName("UTF-8")));
-                        if (apiResult != null) {
-                            // write back the result to channel
-                            String response = gson.toJson(apiResult);
-                            client.write(ByteBuffer.wrap(response.getBytes()));
-                        }
+                        
+                        byte[] request = trimmedBytes;
+                        boolean retryParsing = true;
+                        int trials = 0;
+                        while (retryParsing) {
+                            try {
+                                Object apiResult = callMethod(new String(request, Charset.forName("UTF-8")));
+                                if (apiResult != null) {
+                                    // write back the result to channel
+                                    String response = gson.toJson(apiResult);
+                                    client.write(ByteBuffer.wrap(response.getBytes()));
+                                }
 
-                        client.register(selector, SelectionKey.OP_READ);
+                                retryParsing = false;
+                                incompleteRequests.remove(client);
+                                client.register(selector, SelectionKey.OP_READ);
+                            } catch (JsonSyntaxException e) {
+                                if (trials > 0) {
+                                    incompleteRequests.put(client, request);
+                                    break;
+                                }
+                                
+                                byte[] partialRequest = incompleteRequests.get(client);
+                                if (partialRequest == null) {
+                                    incompleteRequests.put(client, trimmedBytes);
+                                    retryParsing = false;
+                                } else {
+                                    request = new byte[partialRequest.length + trimmedBytes.length];
+                                    System.arraycopy(partialRequest, 0, request, 0, partialRequest.length);
+                                    System.arraycopy(trimmedBytes, 0, request, partialRequest.length+1, trimmedBytes.length);
+                                }
+                                trials++;                                
+                            }
+                        }
                     }
 
                     selectedKeys.remove();
