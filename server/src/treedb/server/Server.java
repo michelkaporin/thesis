@@ -31,6 +31,7 @@ public class Server implements Runnable {
     private JsonParser jsonParser;
     
     private Map<SocketChannel, byte[]> incompleteRequests;
+    private Map<SocketChannel, Long> incompleteRequestsHistory;
     
     public Server(String ip, int port, String[] args) throws IOException {
         initChannel(ip, port);
@@ -62,6 +63,11 @@ public class Server implements Runnable {
                         ByteBuffer buffer = ByteBuffer.allocate(102400);
                         int numRead = client.read(buffer);
 
+                        if (numRead == -1) {
+                            client.close();
+                            continue;
+                        }
+
                         // Call the API and return the result, put it back to the readable state
                         byte[] trimmedBytes = new byte[numRead];
                         System.arraycopy(buffer.array(), 0, trimmedBytes, 0, numRead);
@@ -82,6 +88,12 @@ public class Server implements Runnable {
                                 incompleteRequests.remove(client);
                                 client.register(selector, SelectionKey.OP_READ);
                             } catch (JsonSyntaxException e) {
+                                Long trial = incompleteRequestsHistory.get(client);
+                                if (trial != null && trial+300000L < System.currentTimeMillis()) { // allow only 5 minutes to get the full request
+                                    client.close();
+                                    incompleteRequestsHistory.remove(client);
+                                    break;
+                                }
                                 if (trials > 0) {
                                     incompleteRequests.put(client, request);
                                     break;
@@ -90,11 +102,12 @@ public class Server implements Runnable {
                                 byte[] partialRequest = incompleteRequests.get(client);
                                 if (partialRequest == null) {
                                     incompleteRequests.put(client, trimmedBytes);
+                                    incompleteRequestsHistory.put(client, System.currentTimeMillis());
                                     retryParsing = false;
                                 } else {
                                     request = new byte[partialRequest.length + trimmedBytes.length];
                                     System.arraycopy(partialRequest, 0, request, 0, partialRequest.length);
-                                    System.arraycopy(trimmedBytes, 0, request, partialRequest.length+1, trimmedBytes.length);
+                                    System.arraycopy(trimmedBytes, 0, request, partialRequest.length, trimmedBytes.length);
                                 }
                                 trials++;                                
                             }
