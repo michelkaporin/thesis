@@ -38,6 +38,7 @@ public class Server implements Runnable {
         gson = new Gson();
         jsonParser = new JsonParser();
         incompleteRequests = new HashMap<SocketChannel, byte[]>();
+        incompleteRequestsHistory = new HashMap<SocketChannel, Long>();
         LOGGER.setLevel(Level.SEVERE);
         API.init(args);
     }
