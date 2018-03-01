@@ -32,7 +32,7 @@ public class Main {
         Logger l = Logger.getLogger("TreeDB Performance");
         l.setLevel(Level.INFO);
         l.setUseParentHandlers(false);
-        Handler handler = new FileHandler("performance.csv");
+        Handler handler = new FileHandler("performance.log");
         handler.setFormatter(new LogFormatter());
         l.addHandler(handler);
         l.info("Time\tCurrent Memory Consumption\tStream ID\tRequest Type\tOperation Elapsed Time\tChunk Count");
