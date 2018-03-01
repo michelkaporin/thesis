@@ -20,10 +20,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.n1analytics.paillier.PaillierPublicKey;
+import treedb.server.utils.FailureJson;
 import treedb.server.utils.Utility;
 
 public class Server implements Runnable {
-    private static Logger LOGGER = Logger.getLogger("TreeDB Server");
+    private static Logger LOGGER_API = Logger.getLogger("TreeDB API");
 
     private ServerSocketChannel serverChannel;
     private Selector selector; 
@@ -39,12 +40,12 @@ public class Server implements Runnable {
         jsonParser = new JsonParser();
         incompleteRequests = new HashMap<SocketChannel, byte[]>();
         incompleteRequestsHistory = new HashMap<SocketChannel, Long>();
-        LOGGER.setLevel(Level.SEVERE);
+        LOGGER_API.setLevel(Level.WARNING);
         API.init(args);
     }
     
     public void run() {
-        LOGGER.info("Server is running");
+        LOGGER_API.info("Server is running");
         while (serverChannel.isOpen()) {
             try {
                 selector.select();
@@ -79,11 +80,9 @@ public class Server implements Runnable {
                         while (retryParsing) {
                             try {
                                 Object apiResult = callMethod(new String(request, Charset.forName("UTF-8")));
-                                if (apiResult != null) {
-                                    // write back the result to channel
-                                    String response = gson.toJson(apiResult);
-                                    client.write(ByteBuffer.wrap(response.getBytes()));
-                                }
+                                // write back the result to channel
+                                String response = gson.toJson(apiResult);
+                                client.write(ByteBuffer.wrap(response.getBytes()));
 
                                 retryParsing = false;
                                 incompleteRequests.remove(client);
@@ -110,7 +109,7 @@ public class Server implements Runnable {
                                     System.arraycopy(partialRequest, 0, request, 0, partialRequest.length);
                                     System.arraycopy(trimmedBytes, 0, request, partialRequest.length, trimmedBytes.length);
                                 }
-                                trials++;                                
+                                trials++;
                             }
                         }
                     }
@@ -118,7 +117,7 @@ public class Server implements Runnable {
                     selectedKeys.remove();
                 }
 			} catch (IOException | ClosedSelectorException e) {
-				LOGGER.severe(e.toString() + ": " + e.getMessage());
+				LOGGER_API.severe(e.toString() + ": " + e.getMessage());
 			}
         }
     }
@@ -138,8 +137,14 @@ public class Server implements Runnable {
     }
 
     private Object callMethod(String json) {
-        LOGGER.info(json);
-        JsonObject jobject = jsonParser.parse(json).getAsJsonObject();
+        LOGGER_API.info(json);
+        JsonObject jobject = null;
+        try {
+            jobject = jsonParser.parse(json).getAsJsonObject();
+        } catch (IllegalStateException e) {
+            return new FailureJson("JSON provided is incorrect.");
+        }
+        
         String operationName = jobject.get("operationID").getAsString();
 
         switch (operationName) {
@@ -184,10 +189,10 @@ public class Server implements Runnable {
                 return API.getStatistics(Utility.UUIDFromString(streamID), from, to);
             }
             default: {
-                LOGGER.warning(String.format("Operation %s is not supported", operationName));
+                String msg = String.format("Operation %s is not supported", operationName);
+                LOGGER_API.warning(msg);
+                return new FailureJson(msg);
             }
         }
-
-        return null;
     }
 }

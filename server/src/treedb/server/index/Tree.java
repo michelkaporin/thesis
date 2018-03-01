@@ -19,6 +19,7 @@ public class Tree {
 	private MetadataConfiguration metaConfig;
 	
 	private List<Node> lastNodes; // Stores last node under each tree level
+	private int leavesCount;
 	
 	public Tree(int k, MetadataConfiguration metaConfig) {
 		root = new Node();
@@ -28,6 +29,8 @@ public class Tree {
 		
 		lastNodes = new ArrayList<Node>();
 		lastNodes.add(root);
+
+		leavesCount = 0;
 	}
 
 	public MetadataConfiguration getMetadataConfig() {
@@ -39,6 +42,7 @@ public class Tree {
 	 */
 	public void insert(String key, Metadata metadata) {
 		ChunkNode insertNode = new ChunkNode(metadata, key);
+		this.leavesCount++;
 		
 		int currentLevel = 0;
 		
@@ -85,7 +89,7 @@ public class Tree {
 			this.updateMetadata(lastRoot);
 		}
 
-		this.updateMetadata(insertNode); // update tree metadata for newly created node		
+		this.updateMetadata(insertNode); // update tree metadata for newly created node
 	}
 
 	public List<String> getRange(long from, long to) throws IllegalArgumentException {
@@ -160,6 +164,10 @@ public class Tree {
 		}
 
 		return false;
+	}
+
+	public int getLeavesCount() {
+		return this.leavesCount;
 	}
 
 	/**

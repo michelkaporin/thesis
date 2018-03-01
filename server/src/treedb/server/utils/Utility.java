@@ -1,12 +1,14 @@
 package treedb.server.utils;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.BitSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.UUID;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -57,5 +59,16 @@ public class Utility {
             toBitSet.set(nextBit);
             nextBit = fromBitSet.nextSetBit(nextBit+1);
         }
+    }
+
+    public static String logString(UUID streamID, String operation, long operationNanoTime, int chunkCount) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(LocalDateTime.now() + "\t");
+        sb.append(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory() + "\t");
+        sb.append(streamID.toString() + "\t");
+        sb.append(operation + "\t");
+        sb.append(String.format(Locale.ROOT, "%.2f", (float) (operationNanoTime)/1000000) + "\t");
+        sb.append(chunkCount + "\t");
+        return sb.toString();
     }
 }

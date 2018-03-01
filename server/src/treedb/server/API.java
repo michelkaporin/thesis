@@ -2,6 +2,7 @@ package treedb.server;
 
 import ch.ethz.dsg.ecelgamal.ECElGamal.ECElGamalCiphertext;
 import ch.ethz.dsg.ore.ORE.ORECiphertext;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import treedb.server.index.Metadata;
 import treedb.server.index.MetadataConfiguration;
 import treedb.server.index.enums.HomomorphicAlgorithm;
@@ -32,7 +34,9 @@ import treedb.server.utils.FailureJson;
 import treedb.server.utils.Utility;
 
 public class API {
-    private static final int PAILLIER_EXPONENT = 2048;
+    private static Logger LOGGER_PERFORMANCE = Logger.getLogger("TreeDB Performance");
+
+	private static final int PAILLIER_EXPONENT = 2048;
 	
 	private static Map<UUID, Tree> indexMap = new HashMap<UUID, Tree>();
 	private static Storage storage;
@@ -46,6 +50,8 @@ public class API {
     }
 
 	public static Object createStream(int k, String metaConfig, PaillierPublicKey pubKey, String datalayer) {
+		long start = System.nanoTime();
+
 		UUID id = UUID.randomUUID();
 
 		switch (datalayer) {
@@ -66,10 +72,14 @@ public class API {
 		mc.setPaillierPublicKey(pubKey);
 
 		indexMap.put(id, new Tree(k, mc));
+		LOGGER_PERFORMANCE.info(Utility.logString(id, "createStream", System.nanoTime()-start, 0));
+		
 		return id.toString();
 	}
 
 	public static Object insert(UUID streamID, String key, byte[] data, String metadata) {
+		long start = System.nanoTime();
+
 		Tree index = indexMap.get(streamID);
 		if (index == null) {
 			return new FailureJson("No stream exists for the following ID.");
@@ -155,9 +165,10 @@ public class API {
 			return new FailureJson("The index is append-only. Insertion of data in the middle is not allowed.");
 		}
 
-		if (storage.store(streamID.toString(), key, data)) {
-			index.insert(key, md);
-		} else {
+		index.insert(key, md);
+		LOGGER_PERFORMANCE.info(Utility.logString(streamID, "insert", System.nanoTime()-start, index.getLeavesCount()));
+
+		if (!storage.store(streamID.toString(), key, data)) {
 			return new FailureJson("Insertion failed to happen due to storage problems.");
 		}
 
