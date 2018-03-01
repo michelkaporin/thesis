@@ -28,7 +28,7 @@ public class ECElGamalWrapper {
 
     public BigInteger decodeAndDecrypt(String encodedCiphertext) {
         ECElGamalCiphertext ciphertext = ECElGamalCiphertext.decode(Base64.getDecoder().decode(encodedCiphertext));
-        int decrypted = ECElGamal.decrypt32(ciphertext, this.key); // Would be great to have it represented as BigInteger to match Paillier implementation
+        long decrypted = ECElGamal.decrypt64(ciphertext, this.key);
 
         return BigInteger.valueOf(decrypted);
     }
