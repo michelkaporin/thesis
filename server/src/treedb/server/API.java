@@ -77,6 +77,12 @@ public class API {
 		return id.toString();
 	}
 
+	public static Object deleteStream(UUID streamID) {
+		indexMap.remove(streamID);
+		System.gc();
+		return true;
+	}
+
 	public static Object insert(UUID streamID, String key, byte[] data, String metadata) {
 		long start = System.nanoTime();
 

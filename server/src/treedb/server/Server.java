@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.n1analytics.paillier.PaillierPublicKey;
+
 import treedb.server.utils.FailureJson;
 import treedb.server.utils.Utility;
 
@@ -145,54 +146,61 @@ public class Server implements Runnable {
             return new FailureJson("JSON provided is incorrect.");
         }
         
-        String operationName = jobject.get("operationID").getAsString();
+        try {
+            String operationName = jobject.get("operationID").getAsString();
+            switch (operationName) {
+                case "insert": {
+                    String streamID = jobject.get("streamID").getAsString();
+                    String key = jobject.get("key").getAsString();
+                    String data = jobject.get("data").getAsString();
+                    String metadata = jobject.get("metadata").getAsString();
 
-        switch (operationName) {
-            case "insert": {
-                String streamID = jobject.get("streamID").getAsString();
-                String key = jobject.get("key").getAsString();
-                String data = jobject.get("data").getAsString();
-                String metadata = jobject.get("metadata").getAsString();
-
-                return API.insert(Utility.UUIDFromString(streamID), key, Utility.decodeBase64(data), metadata);
-            }
-            case "create": {
-                int k = jobject.get("k").getAsInt();
-                String contract = jobject.get("contract").getAsString();
-                
-                PaillierPublicKey pubkey = null;                
-                try {
-                    String pubKeyModulus = jobject.get("modulus").getAsString();
-                    pubkey = Utility.unmarshalPublicKey(pubKeyModulus);
-                } catch (Exception e) {}
-                
-                String storage;
-                try { 
-                    storage = jobject.get("storage").getAsString();
-                } catch (Exception e) {
-                    storage = "";
+                    return API.insert(Utility.UUIDFromString(streamID), key, Utility.decodeBase64(data), metadata);
                 }
-                return API.createStream(k, contract, pubkey, storage.toLowerCase());
-            }
-            case "getrange": {
-                String streamID = jobject.get("streamID").getAsString();
-                long from = jobject.get("from").getAsLong();
-                long to = jobject.get("to").getAsLong();
+                case "create": {
+                    int k = jobject.get("k").getAsInt();
+                    String contract = jobject.get("contract").getAsString();
+                    
+                    PaillierPublicKey pubkey = null;                
+                    try {
+                        String pubKeyModulus = jobject.get("modulus").getAsString();
+                        pubkey = Utility.unmarshalPublicKey(pubKeyModulus);
+                    } catch (Exception e) {}
+                    
+                    String storage;
+                    try { 
+                        storage = jobject.get("storage").getAsString();
+                    } catch (Exception e) {
+                        storage = "";
+                    }
+                    return API.createStream(k, contract, pubkey, storage.toLowerCase());
+                }
+                case "getrange": {
+                    String streamID = jobject.get("streamID").getAsString();
+                    long from = jobject.get("from").getAsLong();
+                    long to = jobject.get("to").getAsLong();
 
-                return API.getRange(Utility.UUIDFromString(streamID), from, to);
-            }
-            case "getstatistics": {
-                String streamID = jobject.get("streamID").getAsString();
-                long from = jobject.get("from").getAsLong();
-                long to = jobject.get("to").getAsLong();
+                    return API.getRange(Utility.UUIDFromString(streamID), from, to);
+                }
+                case "getstatistics": {
+                    String streamID = jobject.get("streamID").getAsString();
+                    long from = jobject.get("from").getAsLong();
+                    long to = jobject.get("to").getAsLong();
 
-                return API.getStatistics(Utility.UUIDFromString(streamID), from, to);
+                    return API.getStatistics(Utility.UUIDFromString(streamID), from, to);
+                }
+                case "delete": {
+                    String streamID = jobject.get("streamID").getAsString();
+                    return API.deleteStream(Utility.UUIDFromString(streamID));
+                }
+                default: {
+                    String msg = String.format("Operation %s is not supported", operationName);
+                    LOGGER_API.warning(msg);
+                    return new FailureJson(msg);
+                }
             }
-            default: {
-                String msg = String.format("Operation %s is not supported", operationName);
-                LOGGER_API.warning(msg);
-                return new FailureJson(msg);
-            }
+        } catch (NullPointerException e) {
+            return new FailureJson("One of the command required JSON attributes were not provided."); 
         }
     }
 }

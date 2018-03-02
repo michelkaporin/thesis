@@ -6,6 +6,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.n1analytics.paillier.PaillierPublicKey;
 import treedb.client.json.CreateStreamRequest;
+import treedb.client.json.DeleteStreamRequest;
 import treedb.client.json.GetRangeRequest;
 import treedb.client.json.GetStatisticsRequest;
 import treedb.client.json.InsertRequest;
@@ -70,6 +71,13 @@ public class TreeDB {
     
     public boolean insert(String streamID, String key, byte[] data, String metadata) throws IOException {
         String json = gson.toJson(new InsertRequest(streamID, key, Base64.getEncoder().encodeToString(data), metadata));
+        LOGGER.info(json);
+
+        return Boolean.valueOf(getResult(json));
+    }
+
+    public boolean delete(String streamID) throws IOException {
+        String json = gson.toJson(new DeleteStreamRequest(streamID));
         LOGGER.info(json);
 
         return Boolean.valueOf(getResult(json));

@@ -2,7 +2,7 @@
 *.class
 /storage/
 /test/storage/
-*.log
+*.log*
 
 # Maven files
 target/
