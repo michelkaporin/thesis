@@ -12,7 +12,7 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "treedb.server.Main",
+            "mainClass": "timecrypt.server.Main",
             "args": "127.0.0.1 8001 AKIAI6DALQXSPRIEAPWQ zerBOTixXhgqvJuij00evoJOOHYDAuYR9cYTZXYy",
             "vmArgs": "--add-modules=java.xml.bind,java.activation"
         },
@@ -24,28 +24,28 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "treedb.baseline.BaselineMain",
+            "mainClass": "timecrypt.baseline.BaselineMain",
             "args": "127.0.0.1 8002"
         },
         {
-            "projectName": "treedb.server",
+            "projectName": "timecrypt.server",
             "type": "java",
             "name": "API Test",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "treedb.test.APITest"
+            "mainClass": "timecrypt.test.APITest"
         },
         {
-            "projectName": "treedb.test",
+            "projectName": "timecrypt.test",
             "type": "java",
             "name": "Integration Test",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopOnEntry": false,
-            "mainClass": "treedb.test.IntegrationTest",
+            "mainClass": "timecrypt.test.IntegrationTest",
             "args": "127.0.0.1 8001"
         }
     ]

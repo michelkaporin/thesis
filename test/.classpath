@@ -11,7 +11,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="var" path="M2_REPO/treedb/treedb.client/0.0.1-SNAPSHOT/treedb.client-0.0.1-SNAPSHOT.jar" sourcepath="M2_REPO/treedb/treedb.client/0.0.1-SNAPSHOT/treedb.client-0.0.1-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/timecrypt/timecrypt.client/0.0.1-SNAPSHOT/timecrypt.client-0.0.1-SNAPSHOT.jar" sourcepath="M2_REPO/timecrypt/timecrypt.client/0.0.1-SNAPSHOT/timecrypt.client-0.0.1-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/google/code/gson/gson/2.8.2/gson-2.8.2.jar" sourcepath="M2_REPO/com/google/code/gson/gson/2.8.2/gson-2.8.2-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/n1analytics/javallier_2.10/0.6.0/javallier_2.10-0.6.0.jar" sourcepath="M2_REPO/com/n1analytics/javallier_2.10/0.6.0/javallier_2.10-0.6.0-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4.jar" sourcepath="M2_REPO/org/scala-lang/scala-library/2.10.4/scala-library-2.10.4-sources.jar"/>
@@ -25,7 +25,7 @@
 	<classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.7.0/jackson-databind-2.7.0.jar" sourcepath="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.7.0/jackson-databind-2.7.0-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.7.0/jackson-annotations-2.7.0.jar" sourcepath="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.7.0/jackson-annotations-2.7.0-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.7.0/jackson-core-2.7.0.jar" sourcepath="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.7.0/jackson-core-2.7.0-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/treedb/treedb.server/0.0.1-SNAPSHOT/treedb.server-0.0.1-SNAPSHOT.jar" sourcepath="M2_REPO/treedb/treedb.server/0.0.1-SNAPSHOT/treedb.server-0.0.1-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/timecrypt/timecrypt.server/0.0.1-SNAPSHOT/timecrypt.server-0.0.1-SNAPSHOT.jar" sourcepath="M2_REPO/timecrypt/timecrypt.server/0.0.1-SNAPSHOT/timecrypt.server-0.0.1-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
