@@ -19,7 +19,7 @@ public class MetadataList {
         List<String> l = new ArrayList<String>();
 
         for (Metadata m : metadataList) {
-            if (m.from >= from && to <= m.to) {
+            if (m.from >= from && to >= m.to) {
                 l.add(Base64.getEncoder().encodeToString(m.data));
             }
         }
