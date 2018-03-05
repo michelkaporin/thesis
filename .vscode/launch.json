@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "projectName": "treedb.server",
+            "projectName": "timecrypt.server",
             "type": "java",
             "name": "Start Server",
             "request": "launch",
@@ -17,7 +17,7 @@
             "vmArgs": "--add-modules=java.xml.bind,java.activation"
         },
         {
-            "projectName": "treedb.test",
+            "projectName": "timecrypt.test",
             "type": "java",
             "name": "Baseline Server",
             "request": "launch",
