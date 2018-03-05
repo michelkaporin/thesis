@@ -17,6 +17,17 @@
             "vmArgs": "--add-modules=java.xml.bind,java.activation"
         },
         {
+            "projectName": "treedb.test",
+            "type": "java",
+            "name": "Baseline Server",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "stopOnEntry": false,
+            "mainClass": "treedb.baseline.BaselineMain",
+            "args": "127.0.0.1 8002"
+        },
+        {
             "projectName": "treedb.server",
             "type": "java",
             "name": "API Test",
