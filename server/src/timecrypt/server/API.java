@@ -208,6 +208,10 @@ public class API {
 		}
 
 		List<Metadata> metadata = index.getMetadata(from, to);
+		if (metadata.size() == 0) {
+			return new FailureJson("There is no data information about the range provided.");
+		}
+
 		return Metadata.consolidate(index.getMetadataConfig(), metadata).toJson(index.getMetadataConfig());
 	}
 }
