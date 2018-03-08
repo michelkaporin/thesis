@@ -13,12 +13,10 @@ import java.util.concurrent.Executors;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.n1analytics.paillier.PaillierPrivateKey;
-import com.n1analytics.paillier.PaillierPublicKey;
 
 import timecrypt.client.TimeCrypt;
-import timecrypt.client.security.CryptoKeyPair;
 import timecrypt.client.security.OPEWrapper;
+import timecrypt.client.security.PaillierWrapper;
 import timecrypt.client.security.Trapdoor;
 import timecrypt.client.utils.Utility;
 import timecrypt.server.Server;
@@ -56,24 +54,24 @@ public class IntegrationTest {
 		client.openConnection();
 		
 		byte[] key = new byte[16];
-		CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 		Trapdoor td = new Trapdoor();
+		PaillierWrapper paillier = new PaillierWrapper();
 		OPEWrapper ope = new OPEWrapper();
-        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", keys.publicKey, null);
-		testInsert(client, streamID, keys.publicKey, td, ope);
+        String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true, 'count': true, 'tags': true }", paillier.getPublicKey(), null);
+		testInsert(client, streamID, paillier, td, ope);
         testGetRange(client, streamID);
-		testGetStatistics(client, streamID, keys.privateKey, td, ope);
+		testGetStatistics(client, streamID, paillier, td, ope);
 
 		client.closeConnection();
 		// server.terminate();
 	}
 
-	private static void testInsert(TimeCrypt client, String streamID, PaillierPublicKey pubKey, Trapdoor td, OPEWrapper ope) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+	private static void testInsert(TimeCrypt client, String streamID, PaillierWrapper paillier, Trapdoor td, OPEWrapper ope) throws IOException, InvalidKeyException, NoSuchAlgorithmException {
 		for (int i = 1; i < 16; i += 2) {
 			long from = i;
 			long to = i+1;
-			BigInteger sum = pubKey.raw_encrypt(new BigInteger(String.valueOf(1)));
-			BigInteger count = pubKey.raw_encrypt(new BigInteger(String.valueOf(1)));
+			BigInteger sum = paillier.encrypt(new BigInteger(String.valueOf(1)));
+			BigInteger count = paillier.encrypt(new BigInteger(String.valueOf(1)));
 			String keyAndData = String.format("%s-%s", from, to); // data should be encrypted in a non-paillier way
 			String tags = td.getFilter("test" + keyAndData, 0.01, 16);
 			BigInteger min = ope.encrypt(BigInteger.valueOf(from));
@@ -86,7 +84,7 @@ public class IntegrationTest {
         }
 	}
 	
-	private static void testGetStatistics(TimeCrypt client, String streamID, PaillierPrivateKey privKey, Trapdoor td, OPEWrapper ope) throws Exception {
+	private static void testGetStatistics(TimeCrypt client, String streamID, PaillierWrapper paillier, Trapdoor td, OPEWrapper ope) throws Exception {
 		long from = 7;
 		long to = 12;
 		System.out.format("Querying for stats in %s..%s\n", from, to);
@@ -100,7 +98,7 @@ public class IntegrationTest {
 		BigInteger count = jObj.get("count").getAsBigInteger();
 		BigInteger min = jObj.get("min").getAsBigInteger();
 		BigInteger max = jObj.get("max").getAsBigInteger();
-		System.out.format("sum: %s; count: %s\n", privKey.raw_decrypt(sum), privKey.raw_decrypt(count));
+		System.out.format("sum: %s; count: %s\n", paillier.decrypt(sum), paillier.decrypt(count));
 		System.out.format("min: %s; max: %s\n", ope.decrypt(min), ope.decrypt(max));
 
 		JsonArray tags = jObj.get("tags").getAsJsonArray();
@@ -138,13 +136,13 @@ public class IntegrationTest {
 					TimeCrypt client = new TimeCrypt(ip, port);
 					client.openConnection();
 		
-					CryptoKeyPair keys = CryptoKeyPair.generateKeyPair();
 					Trapdoor td = new Trapdoor();
 					OPEWrapper ope = new OPEWrapper();
+					PaillierWrapper paillier = new PaillierWrapper();
 					//String streamID = client.createStream(2, "{ 'sum': true, 'min': true, 'max': true }");
 					//testInsert(client, streamID);
 					//testGetRange(client, streamID);
-					testGetStatistics(client, "streamID", keys.privateKey, td, ope);
+					testGetStatistics(client, "streamID", paillier, td, ope);
 
 					return null;
 				}		
