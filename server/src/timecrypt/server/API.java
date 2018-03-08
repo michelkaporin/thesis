@@ -198,6 +198,10 @@ public class API {
 			}
 		}
 
+		if (results.size() == 0) {
+			return new FailureJson("There is no data stored under the range requested.");
+		}
+		
 		return results;
 	}
 	
