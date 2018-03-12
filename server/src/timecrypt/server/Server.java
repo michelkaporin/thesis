@@ -80,7 +80,13 @@ public class Server implements Runnable {
                         int trials = 0;
                         while (retryParsing) {
                             try {
-                                Object apiResult = callMethod(new String(request, Charset.forName("UTF-8")));
+                                Object apiResult = null;
+                                try {
+                                    apiResult = callMethod(new String(request, Charset.forName("UTF-8")));
+                                } catch (OutOfMemoryError e) { // Out of memory error should not fail the server
+                                    apiResult = new FailureJson("TimeCrypt ran out of memory.");
+                                }
+
                                 // write back the result to channel
                                 String response = gson.toJson(apiResult);
                                 client.write(ByteBuffer.wrap(response.getBytes()));
