@@ -30,7 +30,6 @@ public class FileSystem implements Storage {
 			e.printStackTrace(); // TODO: move to more serious logging solution (e.g. log4j)
 			return false;
         }
-        System.out.println("Created " + dir.concat(key));
         return true;
     }
 
