@@ -123,7 +123,7 @@ public class TimeCrypt {
             throw e;
         }
 
-        buffer = ByteBuffer.allocate(5120);  // 5 MB buffer max
+        buffer = ByteBuffer.allocate(5242880);  // 5 MB buffer max
         int numRead = 0;
         try {
             numRead = channel.read(buffer);
