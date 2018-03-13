@@ -66,6 +66,7 @@ public class Tree {
 			} else {
 				lastNodes.get(currentLevel).children.add(previousNode);
 				previousNode.parent = lastNodes.get(currentLevel);
+				break;
 			}
 
 			// Navigate to the upper level in the tree
