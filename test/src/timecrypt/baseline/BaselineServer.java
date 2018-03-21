@@ -62,8 +62,11 @@ public class BaselineServer implements Runnable {
                         System.arraycopy(buffer.array(), 0, trimmedBytes, 0, numRead);
                         
                         Object apiResult = callMethod(new String(trimmedBytes));
-                        String response = gson.toJson(apiResult);
-                        client.write(ByteBuffer.wrap(response.getBytes()));
+                        ByteBuffer response = ByteBuffer.wrap(gson.toJson(apiResult).getBytes());
+                        int bytesWritten = 0;
+                        while (bytesWritten != response.capacity()) {
+                            bytesWritten += client.write(response);
+                        }
                         client.register(selector, SelectionKey.OP_READ);
                     }
 
