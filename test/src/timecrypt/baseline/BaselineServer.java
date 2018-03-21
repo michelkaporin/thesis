@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import timecrypt.server.utils.FailureJson;
 
@@ -60,8 +61,25 @@ public class BaselineServer implements Runnable {
                         // Call the API and return the result, put it back to the readable state
                         byte[] trimmedBytes = new byte[numRead];
                         System.arraycopy(buffer.array(), 0, trimmedBytes, 0, numRead);
+
+                        Object apiResult = null;
+                        boolean successfulParse = false;
+                        while (!successfulParse) {
+                            try {
+                                apiResult = callMethod(new String(trimmedBytes));
+                                successfulParse = true;
+                            } catch (JsonSyntaxException e) {
+                                System.out.println("Failed to parse: " + new String(trimmedBytes));
+                                buffer.clear();
+                                numRead = client.read(buffer);
+
+                                byte[] otherBytes = new byte[trimmedBytes.length + numRead];
+                                System.arraycopy(trimmedBytes, 0, otherBytes, 0, trimmedBytes.length);
+                                System.arraycopy(buffer.array(), 0, otherBytes, trimmedBytes.length, numRead);
+                                trimmedBytes = otherBytes;
+                            }
+                        }
                         
-                        Object apiResult = callMethod(new String(trimmedBytes));
                         ByteBuffer response = ByteBuffer.wrap(gson.toJson(apiResult).getBytes());
                         int bytesWritten = 0;
                         while (bytesWritten != response.capacity()) {
