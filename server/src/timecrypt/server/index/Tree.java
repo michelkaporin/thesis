@@ -10,9 +10,6 @@ import timecrypt.server.index.MetadataConfiguration;
 import timecrypt.server.index.node.ChunkNode;
 import timecrypt.server.index.node.Node;
 
-/**
- * TODO: Consider the cases when the tree is in the middle of insert operation and other data is inserted/read from it
- */
 public class Tree {
 	private Node root;
 	private int k; // maximum amount of children per node
