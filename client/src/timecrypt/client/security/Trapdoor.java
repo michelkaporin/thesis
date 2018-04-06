@@ -13,7 +13,7 @@ import timecrypt.client.utils.Utility;
 
 public class Trapdoor {
     private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
-    private byte[] key = new byte[256];
+    private byte[] key = new byte[16];
 
     public Trapdoor() throws NoSuchAlgorithmException {
         // Generate symmetric key for the trapdoor
