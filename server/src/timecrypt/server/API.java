@@ -52,7 +52,11 @@ public class API {
 	public static Object createStream(int k, String metaConfig, PaillierPublicKey pubKey, String datalayer) {
 		long start = System.nanoTime();
 
-		UUID id = UUID.randomUUID();
+		UUID id = null;
+		// Ensure uniqueness of stream identifier within the system
+		while (id == null || indexMap.containsKey(id)) { 
+			id = UUID.randomUUID();
+		}
 
 		switch (datalayer) {
 			case "s3":
