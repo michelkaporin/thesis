@@ -4,7 +4,7 @@
   <class id="1" language="java" name="timecrypt.server.API" project="timecrypt" 
     file="/timecrypt/src/timecrypt/server/API.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="436" y="67"/>    
-    <display autosize="true" stereotype="true" package="false" initial-value="false" signature="true" 
+  <display autosize="true" stereotype="true" package="false" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="false" package="false" protected="false" private="false" static="false"/>      
       <operations public="false" package="false" protected="false" private="false" static="false"/>    
