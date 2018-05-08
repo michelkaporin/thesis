@@ -13,7 +13,7 @@
             "console": "internalConsole",
             "stopOnEntry": false,
             "mainClass": "timecrypt.server.Main",
-            "args": "127.0.0.1 8001 AKIAI6DALQXSPRIEAPWQ zerBOTixXhgqvJuij00evoJOOHYDAuYR9cYTZXYy",
+            "args": "127.0.0.1 8001 aws1 aws2",
             "vmArgs": "--add-modules=java.xml.bind,java.activation"
         },
         {
